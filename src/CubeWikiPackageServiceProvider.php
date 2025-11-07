@@ -2,6 +2,7 @@
 
 namespace TerpDev\CubeWikiPackage;
 
+use Filament\Facades\Filament;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
@@ -23,11 +24,6 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
 
     public function configurePackage(Package $package): void
     {
-        /*
-         * This class is a Package Service Provider
-         *
-         * More info: https://github.com/spatie/laravel-package-tools
-         */
         $package->name(static::$name)
             ->hasCommands($this->getCommands())
             ->hasInstallCommand(function (InstallCommand $command) {
@@ -55,11 +51,36 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
         }
     }
 
-    public function packageRegistered(): void {}
-
+    public function packageRegistered(): void
+    {
+        // Registreer het CubeWiki Filament Panel
+        $this->app->register(\TerpDev\CubeWikiPackage\Filament\CubeWikiPanelProvider::class);
+    }
 
     public function packageBooted(): void
     {
+        // Automatically register Knowledge Base page in default admin panel
+        // Users can disable this by using the plugin in their panel provider
+        Filament::serving(function () {
+            // Only auto-register if not already registered via plugin
+            $panels = Filament::getPanels();
+            $hasPlugin = false;
+
+            foreach ($panels as $panel) {
+                if ($panel->hasPlugin('cubewiki')) {
+                    $hasPlugin = true;
+                    break;
+                }
+            }
+
+            // Auto-register in default admin panel if plugin not used
+            if (!$hasPlugin) {
+                Filament::registerPages([
+                    \TerpDev\CubeWikiPackage\Filament\Pages\KnowledgeBase::class,
+                ]);
+            }
+        });
+
         // Asset Registration
         FilamentAsset::register(
             $this->getAssets(),
@@ -75,21 +96,21 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
         FilamentIcon::register($this->getIcons());
 
         // Publish assets
-        $this->publishes([
-            __DIR__ . '/../resources/dist' => public_path('vendor/cubewikipackage'),
-        ], 'cubewikipackage-assets');
-
-        // Handle Stubs
-        if (app()->runningInConsole()) {
-            foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
-                $this->publishes([
-                    $file->getRealPath() => base_path("stubs/cubewikipackage/{$file->getFilename()}"),
-                ], 'cubewikipackage-stubs');
-            }
-        }
-
-        // Testing
-        Testable::mixin(new TestsCubeWikiPackage);
+//        $this->publishes([
+//            __DIR__ . '/../resources/dist' => public_path('vendor/cubewikipackage'),
+//        ], 'cubewikipackage-assets');
+//
+//        // Handle Stubs
+//        if (app()->runningInConsole()) {
+//            foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
+//                $this->publishes([
+//                    $file->getRealPath() => base_path("stubs/cubewikipackage/{$file->getFilename()}"),
+//                ], 'cubewikipackage-stubs');
+//            }
+//        }
+//
+//        // Testing
+//        Testable::mixin(new TestsCubeWikiPackage);
     }
 
     protected function getAssetPackageName(): ?string
