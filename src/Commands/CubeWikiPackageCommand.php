@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace TerpDev\CubeWikiPackage\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class CubeWikiPackageCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'cubewikipackage';
 
     public $description = 'My command';
 

@@ -1,1 +1,4 @@
-@import '../../vendor/filament/filament/resources/css/theme.css';
+/* Package-specific custom styles only - no Tailwind generation */
+.border-l-3 {
+    border-left-width: 3px;
+}

@@ -1,20 +1,23 @@
 <?php
 
-namespace VendorName\Skeleton;
+namespace TerpDev\CubeWikiPackage;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use TerpDev\CubeWikiPackage\Pages\KnowledgeBase;
 
-class SkeletonPlugin implements Plugin
+class CubeWikiPackagePlugin implements Plugin
 {
     public function getId(): string
     {
-        return 'skeleton';
+        return 'cubewikipackage';
     }
 
     public function register(Panel $panel): void
     {
-        //
+        $panel->pages([
+            KnowledgeBase::class,
+        ]);
     }
 
     public function boot(Panel $panel): void
@@ -35,3 +38,4 @@ class SkeletonPlugin implements Plugin
         return $plugin;
     }
 }
+

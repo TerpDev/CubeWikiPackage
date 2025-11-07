@@ -1,8 +1,7 @@
 <?php
 
-namespace VendorName\Skeleton;
+namespace TerpDev\CubeWikiPackage;
 
-use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
@@ -13,14 +12,14 @@ use Livewire\Features\SupportTesting\Testable;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use VendorName\Skeleton\Commands\SkeletonCommand;
-use VendorName\Skeleton\Testing\TestsSkeleton;
+use TerpDev\CubeWikiPackage\Commands\CubeWikiPackageCommand;
+use TerpDev\CubeWikiPackage\Testing\TestsCubeWikiPackage;
 
-class SkeletonServiceProvider extends PackageServiceProvider
+class CubeWikiPackageServiceProvider extends PackageServiceProvider
 {
-    public static string $name = 'skeleton';
+    public static string $name = 'cubewikipackage';
 
-    public static string $viewNamespace = 'skeleton';
+    public static string $viewNamespace = 'cubewikipackage';
 
     public function configurePackage(Package $package): void
     {
@@ -34,9 +33,7 @@ class SkeletonServiceProvider extends PackageServiceProvider
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->publishConfigFile()
-                    ->publishMigrations()
-                    ->askToRunMigrations()
-                    ->askToStarRepoOnGitHub(':vendor_slug/:package_slug');
+                    ->askToStarRepoOnGitHub('terpdev/cubewikipackage');
             });
 
         $configFileName = $package->shortName();
@@ -60,6 +57,7 @@ class SkeletonServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void {}
 
+
     public function packageBooted(): void
     {
         // Asset Registration
@@ -76,22 +74,27 @@ class SkeletonServiceProvider extends PackageServiceProvider
         // Icon Registration
         FilamentIcon::register($this->getIcons());
 
+        // Publish assets
+        $this->publishes([
+            __DIR__ . '/../resources/dist' => public_path('vendor/cubewikipackage'),
+        ], 'cubewikipackage-assets');
+
         // Handle Stubs
         if (app()->runningInConsole()) {
             foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
                 $this->publishes([
-                    $file->getRealPath() => base_path("stubs/skeleton/{$file->getFilename()}"),
-                ], 'skeleton-stubs');
+                    $file->getRealPath() => base_path("stubs/cubewikipackage/{$file->getFilename()}"),
+                ], 'cubewikipackage-stubs');
             }
         }
 
         // Testing
-        Testable::mixin(new TestsSkeleton);
+        Testable::mixin(new TestsCubeWikiPackage);
     }
 
     protected function getAssetPackageName(): ?string
     {
-        return ':vendor_slug/:package_slug';
+        return 'terpdev/cubewikipackage';
     }
 
     /**
@@ -100,9 +103,8 @@ class SkeletonServiceProvider extends PackageServiceProvider
     protected function getAssets(): array
     {
         return [
-            // AlpineComponent::make('skeleton', __DIR__ . '/../resources/dist/components/skeleton.js'),
-            Css::make('skeleton-styles', __DIR__ . '/../resources/dist/skeleton.css'),
-            Js::make('skeleton-scripts', __DIR__ . '/../resources/dist/skeleton.js'),
+            Css::make('cubewikipackage-styles', __DIR__ . '/../resources/dist/cubewikipackage.css'),
+            Js::make('cubewikipackage-scripts', __DIR__ . '/../resources/dist/cubewikipackage.js'),
         ];
     }
 
@@ -112,7 +114,7 @@ class SkeletonServiceProvider extends PackageServiceProvider
     protected function getCommands(): array
     {
         return [
-            SkeletonCommand::class,
+            CubeWikiPackageCommand::class,
         ];
     }
 
@@ -146,7 +148,8 @@ class SkeletonServiceProvider extends PackageServiceProvider
     protected function getMigrations(): array
     {
         return [
-            'create_skeleton_table',
+            'create_cubewikipackage_table',
         ];
     }
 }
+
