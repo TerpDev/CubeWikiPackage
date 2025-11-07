@@ -9,7 +9,17 @@ return [
     | The base URL of your WikiCube API instance
     |
     */
-    'api_url' => env('WIKICUBE_API_URL', 'http://wikicube.test'),
+    'api_url' => env('WIKICUBE_API_URL', 'https://wikicube.test'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | API Token
+    |--------------------------------------------------------------------------
+    |
+    | Your WikiCube API authentication token
+    |
+    */
+    'api_token' => env('WIKICUBE_API_TOKEN'),
 
     /*
     |--------------------------------------------------------------------------
