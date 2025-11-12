@@ -4,7 +4,7 @@
     @if (! $this->knowledgeBaseData)
         <x-filament::section
             heading="Connect to WikiCube"
-            description="Enter your WikiCube API token to access your tenant’s knowledge base."
+            description="Enter your WikiCube API token to access your tenant's knowledge base."
             icon="heroicon-o-key"
         >
             <form wire:submit.prevent="loadKnowledgeBase" class="space-y-6">
@@ -36,53 +36,29 @@
     @else
 
         {{-- ========== TENANT OVERVIEW ========== --}}
-        <x-filament::section>
-            <x-slot name="heading">
-                <div class="flex items-center gap-2">
-                    <x-filament::icon icon="heroicon-o-building-office" class="h-6 w-6" />
-                    {{ $knowledgeBaseData['tenant']['name'] ?? 'Unknown Tenant' }}
+
+        {{-- ========== APPLICATION FILTER ========== --}}
+        @if (count($this->getApplicationOptions()) > 0)
+            <x-filament::section
+                heading="Select Application"
+                description="Choose which application's knowledge base you want to view"
+                icon="heroicon-o-funnel"
+            >
+                <div class="max-w-md">
+                    <x-filament::input.wrapper>
+                        <x-filament::input.select wire:model.live="selectedApplicationId">
+                            <option value="">-- Select an application --</option>
+                            @foreach ($this->getApplicationOptions() as $id => $name)
+                                <option value="{{ $id }}">{{ $name }}</option>
+                            @endforeach
+                        </x-filament::input.select>
+                    </x-filament::input.wrapper>
                 </div>
-            </x-slot>
-
-            <x-slot name="description">
-                ID: {{ $knowledgeBaseData['tenant']['id'] ?? '-' }}
-                • Slug: {{ $knowledgeBaseData['tenant']['slug'] ?? '-' }}
-            </x-slot>
-
-            @php
-                $applications = $knowledgeBaseData['applications'] ?? [];
-                $totalCategories = collect($applications)->sum(fn ($a) => count($a['categories'] ?? []));
-                $totalPages = collect($applications)->sum(
-                    fn ($a) => collect($a['categories'] ?? [])->sum(fn ($c) => count($c['pages'] ?? []))
-                );
-            @endphp
-
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <x-filament::card>
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-primary-600">{{ count($applications) }}</div>
-                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Applications</p>
-                    </div>
-                </x-filament::card>
-
-                <x-filament::card>
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-primary-600">{{ $totalCategories }}</div>
-                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Categories</p>
-                    </div>
-                </x-filament::card>
-
-                <x-filament::card>
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-primary-600">{{ $totalPages }}</div>
-                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Pages</p>
-                    </div>
-                </x-filament::card>
-            </div>
-        </x-filament::section>
+            </x-filament::section>
+        @endif
 
         {{-- ========== APPLICATIONS ========== --}}
-        @forelse ($applications as $application)
+        @forelse ($this->getFilteredApplications() as $application)
             <x-filament::section
                 :heading="$application['name']"
                 :description="count($application['categories'] ?? []) . ' categories • ' .
@@ -150,15 +126,9 @@
                 </div>
             </x-filament::section>
         @empty
-            <x-filament::section>
-                <div class="py-12 text-center">
-                    <x-filament::icon icon="heroicon-o-document-text" class="mx-auto mb-4 h-16 w-16 text-gray-300 dark:text-gray-600" />
-                    <h3 class="mb-1 text-lg font-medium text-gray-900 dark:text-white">No applications found</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">There are no applications available for this tenant.</p>
-                </div>
-            </x-filament::section>
         @endforelse
     @endif
 
     <x-filament-actions::modals />
 </x-filament-panels::page>
+

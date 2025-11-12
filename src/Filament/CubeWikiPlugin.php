@@ -4,14 +4,15 @@ namespace TerpDev\CubeWikiPackage\Filament;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
-use TerpDev\CubeWikiPackage\Filament\Pages\KnowledgeBase;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Support\Facades\Blade;
 
 class CubeWikiPlugin implements Plugin
 {
-    protected bool $hasNavigationGroup = true;
-    protected string $navigationGroup = 'Knowledge Base';
-    protected ?int $navigationSort = 99;
-    protected bool $isEnabled = true;
+    public static string $cubeWikiPanelPath = 'cubewiki';
+    public static string $buttonLabel = 'Documentation';
+    public static string $buttonIcon = 'heroicon-o-book-open';
 
     public function getId(): string
     {
@@ -20,13 +21,10 @@ class CubeWikiPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        if (!$this->isEnabled) {
-            return;
-        }
-
-        $panel->pages([
-            KnowledgeBase::class,
-        ]);
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::BODY_END,
+            fn (): string => Blade::render('<livewire:cubewikipackage-documentation-button />')
+        );
     }
 
     public function boot(Panel $panel): void
@@ -36,52 +34,25 @@ class CubeWikiPlugin implements Plugin
 
     public static function make(): static
     {
-        return app(static::class);
+        return new static();
     }
 
-    public static function get(): static
+    public function cubeWikiPanelPath(string $path): static
     {
-        /** @var static */
-        return filament(app(static::class)->getId());
-    }
-
-    public function navigationGroup(string $group): static
-    {
-        $this->navigationGroup = $group;
+        static::$cubeWikiPanelPath = $path;
         return $this;
     }
 
-    public function navigationSort(int $sort): static
+    public function buttonLabel(string $label): static
     {
-        $this->navigationSort = $sort;
+        static::$buttonLabel = $label;
         return $this;
     }
 
-    public function withoutNavigationGroup(): static
+    public function buttonIcon(string $icon): static
     {
-        $this->hasNavigationGroup = false;
+        static::$buttonIcon = $icon;
         return $this;
-    }
-
-    public function enabled(bool $enabled = true): static
-    {
-        $this->isEnabled = $enabled;
-        return $this;
-    }
-
-    public function disabled(): static
-    {
-        return $this->enabled(false);
-    }
-
-    public function getNavigationGroup(): ?string
-    {
-        return $this->hasNavigationGroup ? $this->navigationGroup : null;
-    }
-
-    public function getNavigationSort(): ?int
-    {
-        return $this->navigationSort;
     }
 }
 

@@ -9,11 +9,13 @@ use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Filesystem\Filesystem;
+use Livewire\Livewire;
 use Livewire\Features\SupportTesting\Testable;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use TerpDev\CubeWikiPackage\Commands\CubeWikiPackageCommand;
+use TerpDev\CubeWikiPackage\Livewire\DocumentationButton;
 use TerpDev\CubeWikiPackage\Testing\TestsCubeWikiPackage;
 
 class CubeWikiPackageServiceProvider extends PackageServiceProvider
@@ -59,27 +61,8 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
-        // Automatically register Knowledge Base page in default admin panel
-        // Users can disable this by using the plugin in their panel provider
-        Filament::serving(function () {
-            // Only auto-register if not already registered via plugin
-            $panels = Filament::getPanels();
-            $hasPlugin = false;
-
-            foreach ($panels as $panel) {
-                if ($panel->hasPlugin('cubewiki')) {
-                    $hasPlugin = true;
-                    break;
-                }
-            }
-
-            // Auto-register in default admin panel if plugin not used
-            if (!$hasPlugin) {
-                Filament::registerPages([
-                    \TerpDev\CubeWikiPackage\Filament\Pages\KnowledgeBase::class,
-                ]);
-            }
-        });
+        // Register Livewire component
+        Livewire::component('cubewikipackage-documentation-button', DocumentationButton::class);
 
         // Asset Registration
         FilamentAsset::register(

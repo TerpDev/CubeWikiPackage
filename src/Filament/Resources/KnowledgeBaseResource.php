@@ -23,8 +23,8 @@ class KnowledgeBaseResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('title'),
-                TextColumn::make('category'),
+//                TextColumn::make('title'),
+//                TextColumn::make('category'),
             ])
             ->actions([
 //                ViewAction::make(),
