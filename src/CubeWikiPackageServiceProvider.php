@@ -61,8 +61,9 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
-        // Register Livewire component
+        // Register Livewire components
         Livewire::component('cubewikipackage-documentation-button', DocumentationButton::class);
+        Livewire::component('cubewiki-sidebar', \TerpDev\CubeWikiPackage\Filament\Pages\Sidebar::class);
 
         // Asset Registration
         FilamentAsset::register(

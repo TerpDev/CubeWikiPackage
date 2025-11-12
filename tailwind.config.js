@@ -12,5 +12,8 @@ module.exports = {
         // classes you generate dynamically or mentioned only in PHP
         "border-l-3",
     ],
+    plugins: [
+        require('@tailwindcss/forms'),
+        require('@tailwindcss/typography'),
+    ],
 };
-

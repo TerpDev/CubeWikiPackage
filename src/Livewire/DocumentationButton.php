@@ -81,8 +81,10 @@ class DocumentationButton extends Component implements HasForms, HasActions
                     'cubewiki_application_id' => $data['application_id'],
                 ]);
 
-                // Redirect to the CubeWiki panel
-                return redirect()->to('/' . CubeWikiPlugin::$cubeWikiPanelPath);
+                // Redirect directly to the KnowledgeBase page within the CubeWiki panel
+                return redirect()->to(route('filament.cubewiki.pages.knowledge-base', [
+                    'app' => (int) $data['application_id'],
+                ]));
             });
     }
 
@@ -95,4 +97,3 @@ class DocumentationButton extends Component implements HasForms, HasActions
         ]);
     }
 }
-
