@@ -78,23 +78,10 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
 
         // Icon Registration
         FilamentIcon::register($this->getIcons());
+        $this->publishes([
+            __DIR__.'/../resources/css/index.css' => public_path('vendor/cubewiki/index.css'),
+        ], 'cubewiki-assets');
 
-        // Publish assets
-//        $this->publishes([
-//            __DIR__ . '/../resources/dist' => public_path('vendor/cubewikipackage'),
-//        ], 'cubewikipackage-assets');
-//
-//        // Handle Stubs
-//        if (app()->runningInConsole()) {
-//            foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
-//                $this->publishes([
-//                    $file->getRealPath() => base_path("stubs/cubewikipackage/{$file->getFilename()}"),
-//                ], 'cubewikipackage-stubs');
-//            }
-//        }
-//
-//        // Testing
-//        Testable::mixin(new TestsCubeWikiPackage);
     }
 
     protected function getAssetPackageName(): ?string

@@ -16,7 +16,6 @@ class KnowledgeBaseResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
-//    protected static ?string $navigationLabel = 'WikiCube Knowledge Base';
     protected static ?string $slug = 'wikicube-knowledge-base';
 
     public static function table(Tables\Table $table): Tables\Table
