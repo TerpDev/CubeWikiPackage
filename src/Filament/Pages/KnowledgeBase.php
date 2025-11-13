@@ -142,17 +142,9 @@ class KnowledgeBase extends Page implements HasForms
             return;
         }
 
-        $this->selectedPageTitle = $page['title'] ?? 'Untitled';
-        $rawHtml                 = (string) ($page['content_html'] ?? '');
-
-        // HTML parsen en TOC opbouwen
-        [$processedHtml, $headings] = $this->buildTocFromHtml($rawHtml);
-
-        $this->selectedPageContentHtml = trim($processedHtml) !== ''
-            ? $processedHtml
-            : '<p class="text-gray-500">No content available.</p>';
-
-        $this->tocHeadings = $headings;
+        $this->selectedPageTitle       = $page['title'] ?? 'Untitled';
+        $rawHtml                       = (string) ($page['content_html'] ?? '');
+        $this->selectedPageContentHtml = trim($rawHtml) !== '' ? $rawHtml : '<p class="text-gray-500">No content available.</p>';
     }
 
     /* ---------------- Helpers ---------------- */
@@ -182,84 +174,6 @@ class KnowledgeBase extends Page implements HasForms
     public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return null;
-    }
-    protected function renderTocHtml(): string
-    {
-        if (empty($this->tocHeadings)) {
-            return '';
-        }
-
-        $html = '<div class="text-sm sticky top-24">'
-            . '<p class="font-semibold mb-3">Op deze pagina</p>'
-            . '<ul class="space-y-1">';
-
-        foreach ($this->tocHeadings as $heading) {
-            $indentRem = max(0, ($heading['level'] - 1) * 1.25);
-
-            $html .= sprintf(
-                '<li style="margin-left: %.2frem;">'
-                . '<a href="#%s" class="block py-0.5 hover:text-primary-600 dark:hover:text-primary-400">'
-                . '%s</a></li>',
-                $indentRem,
-                e($heading['id']),
-                e($heading['text']),
-            );
-        }
-
-        $html .= '</ul></div>';
-
-        return $html;
-    }
-
-    protected function buildTocFromHtml(string $html): array
-    {
-        if (trim($html) === '') {
-            return [$html, []];
-        }
-
-        $dom = new \DOMDocument();
-
-        libxml_use_internal_errors(true);
-        $dom->loadHTML('<?xml encoding="UTF-8">' . $html);
-        libxml_clear_errors();
-
-        $xpath    = new \DOMXPath($dom);
-        $headings = [];
-
-        // Neem h1, h2 en h3 mee
-        foreach ([1, 2, 3] as $level) {
-            foreach ($xpath->query("//h{$level}") as $node) {
-                /** @var \DOMElement $node */
-                $text = trim($node->textContent ?? '');
-                if ($text === '') {
-                    continue;
-                }
-
-                $id = $node->getAttribute('id');
-                if ($id === '') {
-                    $id = Str::slug($text);
-                    $node->setAttribute('id', $id);
-                }
-
-                $headings[] = [
-                    'id'    => $id,
-                    'text'  => $text,
-                    'level' => $level,
-                ];
-            }
-        }
-
-        // Alleen de inhoud van <body> teruggeven
-        $body      = $dom->getElementsByTagName('body')->item(0);
-        $innerHtml = '';
-
-        if ($body) {
-            foreach ($body->childNodes as $child) {
-                $innerHtml .= $dom->saveHTML($child);
-            }
-        }
-
-        return [$innerHtml, $headings];
     }
 
 

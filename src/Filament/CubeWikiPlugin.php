@@ -21,6 +21,9 @@ class CubeWikiPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
+        if ($panel->getId() === 'cubewiki') {
+            return;
+        }
         FilamentView::registerRenderHook(
             PanelsRenderHook::BODY_END,
             fn (): string => Blade::render('<livewire:cubewikipackage-documentation-button />')
@@ -35,24 +38,6 @@ class CubeWikiPlugin implements Plugin
     public static function make(): static
     {
         return new static();
-    }
-
-    public function cubeWikiPanelPath(string $path): static
-    {
-        static::$cubeWikiPanelPath = $path;
-        return $this;
-    }
-
-    public function buttonLabel(string $label): static
-    {
-        static::$buttonLabel = $label;
-        return $this;
-    }
-
-    public function buttonIcon(string $icon): static
-    {
-        static::$buttonIcon = $icon;
-        return $this;
     }
 }
 
