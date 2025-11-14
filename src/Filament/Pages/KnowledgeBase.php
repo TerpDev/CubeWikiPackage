@@ -178,6 +178,7 @@ class KnowledgeBase extends Page implements HasForms
     }
     public function getLocalBreadcrumbs(): array
     {
+        $breadcrumbs = [];
 
         // Applicatie
         if ($this->selectedApplicationId && ($app = $this->getSelectedApplication())) {

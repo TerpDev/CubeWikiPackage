@@ -5,6 +5,7 @@ namespace TerpDev\CubeWikiPackage\Livewire;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -22,12 +23,9 @@ class HelpactionButton extends Component implements HasForms, HasActions
             ->icon('heroicon-o-question-mark-circle')
             ->slideOver()
             ->form([
-                Toggle::make('show_help')
-                    ->label('Show help')
-                    ->inline(false),
-            ])
-            ->action(function (array $data) {
-            });
+                placeholder::make('show_help')
+                    ->label('test')
+            ]);
     }
 
     public function render()

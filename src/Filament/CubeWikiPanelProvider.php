@@ -56,10 +56,13 @@ class CubeWikiPanelProvider extends PanelProvider
                 PanelsRenderHook::SIDEBAR_NAV_START,
                 fn(): string => Blade::render('<livewire:cubewiki-sidebar />')
             )
-            ->renderHook(
-                PanelsRenderHook::GLOBAL_SEARCH_AFTER,
-                fn(): string => Blade::render('<livewire:cubewikipackage-helpaction />')
-            )
+            // Only render the help action when a knowledge-base page is opened
+//            ->renderHook(
+//                PanelsRenderHook::GLOBAL_SEARCH_AFTER,
+//                fn(): string => (int) request()->query('page') > 0
+//                    ? Blade::render('<livewire:cubewikipackage-helpaction />')
+//                    : ''
+//            )
 
         ->renderHook(
                 PanelsRenderHook::HEAD_END,
