@@ -2,6 +2,7 @@
 
 namespace TerpDev\CubeWikiPackage\Filament;
 
+use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -33,6 +34,7 @@ class CubeWikiPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+
             ->discoverResources(in: __DIR__ . '/Resources', for: 'TerpDev\\CubeWikiPackage\\Filament\\Resources')
             ->discoverPages(in: __DIR__ . '/Pages', for: 'TerpDev\\CubeWikiPackage\\Filament\\Pages')
             ->pages([])
@@ -53,9 +55,13 @@ class CubeWikiPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::SIDEBAR_NAV_START,
                 fn(): string => Blade::render('<livewire:cubewiki-sidebar />')
-
             )
             ->renderHook(
+                PanelsRenderHook::GLOBAL_SEARCH_AFTER,
+                fn(): string => Blade::render('<livewire:cubewikipackage-helpaction />')
+            )
+
+        ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 fn(): string => <<<'HTML'
 <style>

@@ -15,7 +15,9 @@ use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use TerpDev\CubeWikiPackage\Commands\CubeWikiPackageCommand;
+use TerpDev\CubeWikiPackage\Filament\Pages\Sidebar;
 use TerpDev\CubeWikiPackage\Livewire\DocumentationButton;
+use TerpDev\CubeWikiPackage\Livewire\HelpactionButton;
 use TerpDev\CubeWikiPackage\Testing\TestsCubeWikiPackage;
 
 class CubeWikiPackageServiceProvider extends PackageServiceProvider
@@ -62,8 +64,9 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         // Register Livewire components
+        Livewire::component('cubewikipackage-helpaction', HelpactionButton::class);
         Livewire::component('cubewikipackage-documentation-button', DocumentationButton::class);
-        Livewire::component('cubewiki-sidebar', \TerpDev\CubeWikiPackage\Filament\Pages\Sidebar::class);
+        Livewire::component('cubewiki-sidebar', Sidebar::class);
 
         // Asset Registration
         FilamentAsset::register(
@@ -78,9 +81,9 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
 
         // Icon Registration
         FilamentIcon::register($this->getIcons());
-        $this->publishes([
-            __DIR__.'/../resources/css/index.css' => public_path('vendor/cubewiki/index.css'),
-        ], 'cubewiki-assets');
+//        $this->publishes([
+//            __DIR__.'/../resources/css/theme.css' => public_path('vendor/cubewiki/theme.css'),
+//        ], 'cubewiki-assets');
 
     }
 
