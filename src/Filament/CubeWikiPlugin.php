@@ -51,7 +51,6 @@ class CubeWikiPlugin implements Plugin
         );
 
     }
-
     public function boot(Panel $panel): void
     {
         //
