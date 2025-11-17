@@ -1,2 +1,3 @@
-@plugin "@tailwindcss/typography";
-
+@tailwind components;
+@tailwind utilities;
+.wk-doc

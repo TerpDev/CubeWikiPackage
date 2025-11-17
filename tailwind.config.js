@@ -1,26 +1,29 @@
-// tailwind.config.js of the Filament app
+/** @type {import('tailwindcss').Config} */
 module.exports = {
     content: [
-        // Local package views and JS
-        "./resources/views/**/*.blade.php",
-        "./resources/**/*.js",
-        "./src/**/*.php",
-
-        // When installed as a dependency in another app, also scan the vendor path
-        "./vendor/terpdev/cubewikipackage/resources/views/**/*.blade.php",
-        "./vendor/terpdev/cubewikipackage/src/**/*.php",
-
-        // Filament core
-        "./vendor/filament/**/*.blade.php",
+        './resources/views/**/*.blade.php',
+        './src/**/*.php',
+        './resources/js/**/*.js',
     ],
     theme: {
         extend: {},
     },
+
+    // Disable Tailwind's preflight (base/reset) to avoid clobbering Filament's own base styles
+    corePlugins: {
+        preflight: false,
+    },
+
     safelist: [
-        "border-l-3",
+        'border-l-3',
+        'prose',
+        'prose-invert',
+        'max-w-none',
+        'wk-doc',
     ],
+
     plugins: [
-        require("@tailwindcss/forms"),
-        require("@tailwindcss/typography"),
+        // require('@tailwindcss/forms'),
+        require('@tailwindcss/typography'),
     ],
 };

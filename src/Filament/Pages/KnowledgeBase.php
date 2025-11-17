@@ -88,7 +88,7 @@ class KnowledgeBase extends Page implements HasForms
             return $schema->schema([
                 Placeholder::make('page_content')
                     ->hiddenLabel()
-                    ->content(fn() => new HtmlString('<div class="wk-doc">' . $this->selectedPageContentHtml . '</div>'))
+                    ->content(fn() => new HtmlString('<div class="prose prose-invert">' . $this->selectedPageContentHtml . '</div>'))
             ])->statePath('formData');
         }
 
