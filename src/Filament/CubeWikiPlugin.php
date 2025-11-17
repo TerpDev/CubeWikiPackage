@@ -3,32 +3,54 @@
 namespace TerpDev\CubeWikiPackage\Filament;
 
 use Filament\Contracts\Plugin;
+use Filament\Facades\Filament;
 use Filament\Panel;
-use TerpDev\CubeWikiPackage\Filament\Pages\KnowledgeBase;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Support\Facades\Blade;
 
 class CubeWikiPlugin implements Plugin
 {
-    protected bool $hasNavigationGroup = true;
-    protected string $navigationGroup = 'Knowledge Base';
-    protected ?int $navigationSort = 99;
-    protected bool $isEnabled = true;
+    public static string $cubeWikiPanelPath = 'cubewiki';
+    public static string $buttonLabel = 'Documentation';
+    public static string $buttonIcon = 'heroicon-o-book-open';
 
     public function getId(): string
     {
-        return 'cubewiki';
+        return 'cubewiki-plugin'; // mag anders heten dan panel-id, is alleen een unieke plugin-id
     }
 
     public function register(Panel $panel): void
     {
-        if (!$this->isEnabled) {
-            return;
-        }
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::SIDEBAR_FOOTER,
+            function (): string {
+                // 👉 Huidige panel ophalen
+                $currentPanel = Filament::getCurrentPanel();
 
-        $panel->pages([
-            KnowledgeBase::class,
-        ]);
+                // Als we in het CubeWiki-panel zitten: NIETS renderen
+                if ($currentPanel?->getId() === self::$cubeWikiPanelPath) {
+                    return '';
+                }
+
+                return Blade::render('<livewire:cubewikipackage-documentation-button />');
+            }
+        );
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::GLOBAL_SEARCH_AFTER,
+            function (): string {
+                $currentPanel = Filament::getCurrentPanel();
+
+                if ($currentPanel?->getId() === self::$cubeWikiPanelPath) {
+                    return '';
+                }
+
+                return Blade::render('<livewire:cubewikipackage-helpaction />');
+            }
+        );
+
     }
-
     public function boot(Panel $panel): void
     {
         //
@@ -36,52 +58,6 @@ class CubeWikiPlugin implements Plugin
 
     public static function make(): static
     {
-        return app(static::class);
-    }
-
-    public static function get(): static
-    {
-        /** @var static */
-        return filament(app(static::class)->getId());
-    }
-
-    public function navigationGroup(string $group): static
-    {
-        $this->navigationGroup = $group;
-        return $this;
-    }
-
-    public function navigationSort(int $sort): static
-    {
-        $this->navigationSort = $sort;
-        return $this;
-    }
-
-    public function withoutNavigationGroup(): static
-    {
-        $this->hasNavigationGroup = false;
-        return $this;
-    }
-
-    public function enabled(bool $enabled = true): static
-    {
-        $this->isEnabled = $enabled;
-        return $this;
-    }
-
-    public function disabled(): static
-    {
-        return $this->enabled(false);
-    }
-
-    public function getNavigationGroup(): ?string
-    {
-        return $this->hasNavigationGroup ? $this->navigationGroup : null;
-    }
-
-    public function getNavigationSort(): ?int
-    {
-        return $this->navigationSort;
+        return new static();
     }
 }
-

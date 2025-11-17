@@ -9,11 +9,15 @@ use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Filesystem\Filesystem;
+use Livewire\Livewire;
 use Livewire\Features\SupportTesting\Testable;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use TerpDev\CubeWikiPackage\Commands\CubeWikiPackageCommand;
+use TerpDev\CubeWikiPackage\Filament\Pages\Sidebar;
+use TerpDev\CubeWikiPackage\Livewire\DocumentationButton;
+use TerpDev\CubeWikiPackage\Livewire\HelpactionButton;
 use TerpDev\CubeWikiPackage\Testing\TestsCubeWikiPackage;
 
 class CubeWikiPackageServiceProvider extends PackageServiceProvider
@@ -59,27 +63,10 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
-        // Automatically register Knowledge Base page in default admin panel
-        // Users can disable this by using the plugin in their panel provider
-        Filament::serving(function () {
-            // Only auto-register if not already registered via plugin
-            $panels = Filament::getPanels();
-            $hasPlugin = false;
-
-            foreach ($panels as $panel) {
-                if ($panel->hasPlugin('cubewiki')) {
-                    $hasPlugin = true;
-                    break;
-                }
-            }
-
-            // Auto-register in default admin panel if plugin not used
-            if (!$hasPlugin) {
-                Filament::registerPages([
-                    \TerpDev\CubeWikiPackage\Filament\Pages\KnowledgeBase::class,
-                ]);
-            }
-        });
+        // Register Livewire components
+        Livewire::component('cubewikipackage-helpaction', HelpactionButton::class);
+        Livewire::component('cubewikipackage-documentation-button', DocumentationButton::class);
+        Livewire::component('cubewiki-sidebar', Sidebar::class);
 
         // Asset Registration
         FilamentAsset::register(
@@ -94,23 +81,10 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
 
         // Icon Registration
         FilamentIcon::register($this->getIcons());
-
-        // Publish assets
 //        $this->publishes([
-//            __DIR__ . '/../resources/dist' => public_path('vendor/cubewikipackage'),
-//        ], 'cubewikipackage-assets');
-//
-//        // Handle Stubs
-//        if (app()->runningInConsole()) {
-//            foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
-//                $this->publishes([
-//                    $file->getRealPath() => base_path("stubs/cubewikipackage/{$file->getFilename()}"),
-//                ], 'cubewikipackage-stubs');
-//            }
-//        }
-//
-//        // Testing
-//        Testable::mixin(new TestsCubeWikiPackage);
+//            __DIR__.'/../resources/css/theme.css' => public_path('vendor/cubewiki/theme.css'),
+//        ], 'cubewiki-assets');
+
     }
 
     protected function getAssetPackageName(): ?string

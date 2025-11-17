@@ -1,4 +1,2 @@
-/* Package-specific custom styles only - no Tailwind generation */
-.border-l-3 {
-    border-left-width: 3px;
-}
+@plugin "@tailwindcss/typography";
+
