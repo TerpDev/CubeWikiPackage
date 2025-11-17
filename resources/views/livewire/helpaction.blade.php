@@ -7,6 +7,7 @@
         transition duration-200
         hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
     >
+
         <x-filament::icon
             :icon="$icon"
             class="h-6 w-6"

@@ -51,7 +51,6 @@ class CubeWikiPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
-            // Inject the Livewire application selector into the sidebar
             ->renderHook(
                 PanelsRenderHook::SIDEBAR_NAV_START,
                 fn(): string => Blade::render('<livewire:cubewiki-sidebar />')

@@ -118,7 +118,6 @@ class KnowledgeBase extends Page implements HasForms
         $this->selectedPageContentHtml = null;
 
         if ($this->apiToken && $this->selectedApplicationId) {
-
             $service = app(WikiCubeApiService::class);
             $this->knowledgeBaseData = $service->fetchKnowledgeBase($this->apiToken, $this->selectedApplicationId);
         }
@@ -153,10 +152,6 @@ class KnowledgeBase extends Page implements HasForms
         $this->selectedPageId = $pageId;
 
         $page = $this->findPageById($pageId);
-        if (!$page) {
-            Notification::make()->danger()->title('Pagina niet gevonden')->send();
-            return;
-        }
 
         $this->selectedPageTitle = $page['title'] ?? 'Untitled';
         $rawHtml = (string)($page['content_html'] ?? '');

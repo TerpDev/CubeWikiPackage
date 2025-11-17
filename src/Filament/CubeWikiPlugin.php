@@ -15,9 +15,12 @@ class CubeWikiPlugin implements Plugin
     public static string $buttonLabel = 'Documentation';
     public static string $buttonIcon = 'heroicon-o-book-open';
 
+    // Important pages registry that demo or app can set
+
+
     public function getId(): string
     {
-        return 'cubewiki-plugin'; // mag anders heten dan panel-id, is alleen een unieke plugin-id
+        return 'cubewiki-plugin';
     }
 
     public function register(Panel $panel): void
@@ -25,10 +28,8 @@ class CubeWikiPlugin implements Plugin
         FilamentView::registerRenderHook(
             PanelsRenderHook::SIDEBAR_FOOTER,
             function (): string {
-                // 👉 Huidige panel ophalen
                 $currentPanel = Filament::getCurrentPanel();
 
-                // Als we in het CubeWiki-panel zitten: NIETS renderen
                 if ($currentPanel?->getId() === self::$cubeWikiPanelPath) {
                     return '';
                 }
@@ -46,6 +47,9 @@ class CubeWikiPlugin implements Plugin
                     return '';
                 }
 
+                // Pass the registered important pages into the helpaction view via the component's view data
+                // The HelpactionButton Livewire component will read CubeWikiPlugin::getImportantPages() itself,
+                // but keeping this here allows later change if we want to render with Blade data.
                 return Blade::render('<livewire:cubewikipackage-helpaction />');
             }
         );
