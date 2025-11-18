@@ -15,16 +15,44 @@ class CubeWikiPlugin implements Plugin
     public static string $buttonLabel = 'Documentation';
     public static string $buttonIcon = 'heroicon-o-book-open';
 
-    // Important pages registry that demo or app can set
+    // pages voor de grote help-knop
+    public static array $importantPages = [];
 
+    // optioneel: mapping voor hints, nog niet strikt nodig maar alvast aanwezig
+    public static array $hintPages = [];
 
     public function getId(): string
     {
         return 'cubewiki-plugin';
     }
 
+    public function importantPages(array $pages): static
+    {
+        self::$importantPages = $pages;
+
+        return $this;
+    }
+
+    public function hintPages(array $pages): static
+    {
+        self::$hintPages = $pages;
+
+        return $this;
+    }
+
+    public static function getImportantPages(): array
+    {
+        return self::$importantPages;
+    }
+
+    public static function getHintPages(): array
+    {
+        return self::$hintPages;
+    }
+
     public function register(Panel $panel): void
     {
+        // knop onderin sidebar
         FilamentView::registerRenderHook(
             PanelsRenderHook::SIDEBAR_FOOTER,
             function (): string {
@@ -38,6 +66,7 @@ class CubeWikiPlugin implements Plugin
             }
         );
 
+        // help-dropdown in de topbar (rechts naast search)
         FilamentView::registerRenderHook(
             PanelsRenderHook::GLOBAL_SEARCH_AFTER,
             function (): string {
@@ -47,14 +76,11 @@ class CubeWikiPlugin implements Plugin
                     return '';
                 }
 
-                // Pass the registered important pages into the helpaction view via the component's view data
-                // The HelpactionButton Livewire component will read CubeWikiPlugin::getImportantPages() itself,
-                // but keeping this here allows later change if we want to render with Blade data.
                 return Blade::render('<livewire:cubewikipackage-helpaction />');
             }
         );
-
     }
+
     public function boot(Panel $panel): void
     {
         //

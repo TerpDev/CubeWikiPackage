@@ -74,7 +74,7 @@ class KnowledgeBase extends Page implements HasForms
     public function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {
         // hier moet ff de log komen van de headings zodat ik kan kijken of ze goed worden opgehaald
-        Log::debug('Extracted Headings:', $this->getHeadingsFromContent());
+        Log::debug('head tags', $this->getHeadingsFromContent());
         if (!$this->knowledgeBaseData) {
             return $schema->schema([
                 Placeholder::make('no_data')

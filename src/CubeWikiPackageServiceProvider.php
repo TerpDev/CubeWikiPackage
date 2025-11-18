@@ -17,7 +17,7 @@ use Spatie\LaravelPackageTools\PackageServiceProvider;
 use TerpDev\CubeWikiPackage\Commands\CubeWikiPackageCommand;
 use TerpDev\CubeWikiPackage\Filament\Pages\Sidebar;
 use TerpDev\CubeWikiPackage\Livewire\DocumentationButton;
-use TerpDev\CubeWikiPackage\Livewire\HelpactionButton;
+use TerpDev\CubeWikiPackage\Livewire\WikiactionButton;
 use TerpDev\CubeWikiPackage\Testing\TestsCubeWikiPackage;
 
 class CubeWikiPackageServiceProvider extends PackageServiceProvider
@@ -64,7 +64,8 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         // Register Livewire components
-        Livewire::component('cubewikipackage-helpaction', HelpactionButton::class);
+        Livewire::component('cubewikipackage-helpaction', WikiactionButton::class);
+        Livewire::component('cubewikipackage-hintaction', WikiactionButton::class);
         Livewire::component('cubewikipackage-documentation-button', DocumentationButton::class);
         Livewire::component('cubewiki-sidebar', Sidebar::class);
 
