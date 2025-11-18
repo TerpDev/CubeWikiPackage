@@ -8,7 +8,10 @@ use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Blade;
 use Livewire\Livewire;
 use Livewire\Features\SupportTesting\Testable;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
@@ -23,6 +26,7 @@ use TerpDev\CubeWikiPackage\Testing\TestsCubeWikiPackage;
 class CubeWikiPackageServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'cubewikipackage';
+    public static string $cubeWikiPanelPath = 'cubewiki';
 
     public static string $viewNamespace = 'cubewikipackage';
 
@@ -67,12 +71,25 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
         Livewire::component('cubewikipackage-helpaction', WikiactionButton::class);
         Livewire::component('cubewikipackage-hintaction', WikiactionButton::class);
         Livewire::component('cubewikipackage-documentation-button', DocumentationButton::class);
+
         Livewire::component('cubewiki-sidebar', Sidebar::class);
 
         // Asset Registration
         FilamentAsset::register(
             $this->getAssets(),
             $this->getAssetPackageName()
+        );
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::SIDEBAR_FOOTER,
+            function (): string {
+                $currentPanel = Filament::getCurrentPanel();
+
+                if ($currentPanel?->getId() === self::$cubeWikiPanelPath) {
+                    return '';
+                }
+
+                return Blade::render('<livewire:cubewikipackage-documentation-button />');
+            }
         );
 
         FilamentAsset::registerScriptData(

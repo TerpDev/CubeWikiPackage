@@ -53,18 +53,6 @@ class CubeWikiPlugin implements Plugin
     public function register(Panel $panel): void
     {
         // knop onderin sidebar
-        FilamentView::registerRenderHook(
-            PanelsRenderHook::SIDEBAR_FOOTER,
-            function (): string {
-                $currentPanel = Filament::getCurrentPanel();
-
-                if ($currentPanel?->getId() === self::$cubeWikiPanelPath) {
-                    return '';
-                }
-
-                return Blade::render('<livewire:cubewikipackage-documentation-button />');
-            }
-        );
 
         // help-dropdown in de topbar (rechts naast search)
         FilamentView::registerRenderHook(
