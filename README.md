@@ -36,21 +36,17 @@ php artisan vendor:publish --tag="cubewikipackage-config"
 
 ## Configuration
 
-Add your WikiCube API settings to your `.env` file (optional - users can also enter tokens via the UI):
+Add your WikiCube API settings to your `.env` file ():
 
 ```env
 WIKICUBE_API_URL=https://wikicube.test
 WIKICUBE_API_TOKEN=your-api-token-here
-WIKICUBE_CACHE_DURATION=5
+WIKICUBE_APPLICATION_NAME=your-application-name
 ```
 
 ## Usage
 
-### Automatic Registration (Default)
-
-The Knowledge Base page is automatically added to your admin panel sidebar after installation. No configuration needed!
-
-### Manual Registration (Advanced)
+### Registration (Advanced)
 
 If you want more control, you can manually register the plugin in your `AdminPanelProvider`:
 
@@ -65,8 +61,6 @@ public function panel(Panel $panel): Panel
         ->path('admin')
         ->plugins([
             CubeWikiPlugin::make()
-                ->navigationGroup('Content') // Custom navigation group
-                ->navigationSort(10),        // Custom sort order
         ]);
 }
 ```
@@ -75,19 +69,50 @@ public function panel(Panel $panel): Panel
 
 ```php
 CubeWikiPlugin::make()
-    ->navigationGroup('Knowledge Base')  // Set custom navigation group
-    ->navigationSort(99)                 // Set navigation sort order
-    ->withoutNavigationGroup()           // Remove navigation grouping
-    ->enabled(true)                      // Enable/disable the plugin
-    ->disabled()                         // Disable the plugin
+    ->importantPages([ 
+       ['slug' => 'your-slug-name', 'title' => 'Custom Title']
+    ]) // important pages in the help button in the top
+    ->hintPages([ 
+       ['slug' => 'your-slug-name', 'title' => 'Custom Title']
+    ]) // hint pages as a hint for your schema form components
 ```
+
+### Hint action example
+```php
+use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\HtmlString;
+use Filament\Forms\Components\TextInput;
+
+return $schema
+    ->components([
+        Section::make()
+            ->schema([
+                TextInput::make('slug')
+                    ->label('Slug')
+                    ->disabled()
+                    ->dehydrated()
+                    ->required()
+                    ->maxLength(255)
+                    ->unique(Post::class, 'slug', ignoreRecord: true)
+                    ->hint(function () {
+                        return new HtmlString(
+                            Blade::render(
+                                '<livewire:cubewikipackage-hintaction variant="hint" slug="your-slug-name" label="Custom Title" />'
+                            )
+                        );
+                    }),
+            ]),
+    ]);
+```
+
 
 ## How It Works
 
-1. **Install the package** - Users will see "WikiCube" in their sidebar
-2. **Enter API token** - Click on WikiCube and enter a WikiCube API token
-3. **View knowledge base** - Browse applications, categories, and pages
-4. **Switch tenants** - Click "Change Token" to connect to a different tenant
+1. **Install the package** - User has to use the plugin in their panel to work
+2. **Enter API token** - Enter your api-token in the .env file from your tenant
+3. **View knowledge base** - Click on the documentation button at the bottom of the sidebar to view the knowledge base
+4. **Switch applications** - Click on the top of the sidebar at the application name to switch between different applications
 5. **Refresh data** - Use the refresh button to clear cache and reload
 
 ## Screenshots

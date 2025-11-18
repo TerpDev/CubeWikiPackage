@@ -47,64 +47,6 @@ class DocumentationButton extends Component implements HasForms, HasActions
 
                 return redirect()->to($url);
             });
-//            ->steps([
-//                Step::make('Api Token')
-//                    ->description('Give your Api Token')
-//                    ->schema([
-//                        TextInput::make('token')
-//                            ->label('API Token')
-//                            ->required()
-//                            ->helperText('Enter your WikiCube API token to continue'),
-//                    ])
-//                    ->columns(1),
-//                Step::make('Application')
-//                    ->description('Kies hier de applicatie waar je de informatie van wilt zien')
-//                    ->schema([
-//                        Select::make('application_id')
-//                            ->label('Application')
-//                            ->required()
-//                            ->searchable()
-//                            ->options(function (callable $get) {
-//                                $token = $get('token');
-//
-//                                if (!$token) {
-//                                    return [];
-//                                }
-//
-//                                try {
-//                                    $apiService = app(WikiCubeApiService::class);
-//                                    $data = $apiService->fetchKnowledgeBase($token);
-//
-//                                    // Applications are at the root level, not nested in 'data'
-//                                    if (isset($data['applications']) && is_array($data['applications'])) {
-//                                        $applications = [];
-//                                        foreach ($data['applications'] as $app) {
-//                                            $applications[$app['id']] = $app['name'];
-//                                        }
-//                                        return $applications;
-//                                    }
-//
-//                                    return [];
-//                                } catch (\Exception $e) {
-//                                    return [];
-//                                }
-//                            })
-//                            ->placeholder('Select an application')
-//                            ->helperText('Choose the application you want to view documentation for'),
-//                    ]),
-//            ])
-//            ->action(function (array $data) {
-//                // Store the token and application_id in session
-//                session([
-//                    'cubewiki_token' => $data['token'],
-//                    'cubewiki_application_id' => $data['application_id'],
-//                ]);
-//
-//                // Redirect directly to the KnowledgeBase page within the CubeWiki panel
-//                return redirect()->to(route('filament.cubewiki.pages.knowledge-base', [
-//                    'app' => (int) $data['application_id'],
-//                ]));
-//            });
     }
 
     public function render()

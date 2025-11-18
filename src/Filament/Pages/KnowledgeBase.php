@@ -11,6 +11,7 @@ use Filament\Pages\Page;
 use Illuminate\Support\HtmlString;
 use TerpDev\CubeWikiPackage\Services\WikiCubeApiService;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 
 class KnowledgeBase extends Page implements HasForms
@@ -72,6 +73,8 @@ class KnowledgeBase extends Page implements HasForms
 
     public function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {
+        // hier moet ff de log komen van de headings zodat ik kan kijken of ze goed worden opgehaald
+        Log::debug('head tags', $this->getHeadingsFromContent());
         if (!$this->knowledgeBaseData) {
             return $schema->schema([
                 Placeholder::make('no_data')
@@ -88,11 +91,14 @@ class KnowledgeBase extends Page implements HasForms
             return $schema->schema([
                 Placeholder::make('page_content')
                     ->hiddenLabel()
-                    ->content(fn() => new HtmlString('<div class="wk-doc">' . $this->selectedPageContentHtml . '</div>'))
+                    ->content(fn() => new HtmlString('<div class="prose prose-invert">' . $this->selectedPageContentHtml . '</div>'))
+                    // table of content fromt headings from content method
+
+
             ])->statePath('formData');
         }
 
-        return $schema->schema([
+            return $schema->schema([
             Placeholder::make('welcome')
                 ->hiddenLabel()
                 ->content(fn() => new HtmlString('
@@ -103,8 +109,6 @@ class KnowledgeBase extends Page implements HasForms
                 ')),
         ])->statePath('formData');
     }
-
-
     public function selectApplication(?int $appId): void
     {
         $this->selectedApplicationId = $appId ?: null;
@@ -114,12 +118,27 @@ class KnowledgeBase extends Page implements HasForms
         $this->selectedPageContentHtml = null;
 
         if ($this->apiToken && $this->selectedApplicationId) {
-
             $service = app(WikiCubeApiService::class);
             $this->knowledgeBaseData = $service->fetchKnowledgeBase($this->apiToken, $this->selectedApplicationId);
         }
     }
-    public
+    //get here the headings from the selected page content html
+    public function getHeadingsFromContent(): array
+    {
+        $headings = [];
+        if ($this->selectedPageContentHtml) {
+            $dom = new \DOMDocument();
+            @$dom->loadHTML(mb_convert_encoding($this->selectedPageContentHtml, 'HTML-ENTITIES', 'UTF-8'));
+            $xpath = new \DOMXPath($dom);
+            $nodes = $xpath->query('//h1 | //h2 | //h3 | //h4 | //h5 | //h6');
+            foreach ($nodes as $node) {
+                $headings[] = [
+                    'text' => trim($node->textContent),
+                ];
+            }
+        }
+        return $headings;
+    }
     function selectCategory(?int $categoryId): void
     {
         $this->selectedCategoryId = $categoryId ?: null;
@@ -133,10 +152,6 @@ class KnowledgeBase extends Page implements HasForms
         $this->selectedPageId = $pageId;
 
         $page = $this->findPageById($pageId);
-        if (!$page) {
-            Notification::make()->danger()->title('Pagina niet gevonden')->send();
-            return;
-        }
 
         $this->selectedPageTitle = $page['title'] ?? 'Untitled';
         $rawHtml = (string)($page['content_html'] ?? '');
@@ -202,8 +217,7 @@ class KnowledgeBase extends Page implements HasForms
         return $breadcrumbs;
     }
 
-    public
-    function getHeading(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable|null
     {
         return null;
     }
