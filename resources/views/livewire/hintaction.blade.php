@@ -3,9 +3,9 @@
     <button
         type="button"
         wire:click="openBySlug('{{ $slug }}')"
-        class="cursor-pointer text-xs font-medium text-primary-500 hover:underline"
+        class="cursor-pointer text-xs font-medium hover:underline duration-300"
     >
-        {{ $label ?? 'Hint' }}
+        {{ $label }}
     </button>
 
     <x-filament-actions::modals />
