@@ -1,5 +1,7 @@
 {{-- resources/views/vendor/cubewikipackage/livewire/hintaction.blade.php --}}
 <div class="inline-flex items-center gap-1">
+    <x-filament::icon :icon="$icon" class="h-3 w-3 text-current" />
+
     <button
         type="button"
         wire:click="openBySlug('{{ $slug }}')"

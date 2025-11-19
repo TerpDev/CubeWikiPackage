@@ -72,6 +72,7 @@ class WikiactionButton extends Component implements HasForms, HasActions
     {
         return Action::make('hint')
             ->label('Hint')
+            ->icon('heroicon-o-question-mark-circle')
             ->modal()
             ->modalHeading(fn () => $this->title ?? ($this->label ?? 'Hint'))
             ->modalWidth('md')
@@ -162,6 +163,7 @@ class WikiactionButton extends Component implements HasForms, HasActions
     {
         if ($this->variant === 'hint') {
             return view('cubewikipackage::livewire.hintaction', [
+                'icon'  => 'heroicon-o-question-mark-circle',
                 'label' => $this->label ?? 'Hint',
                 'slug'  => $this->slug,
             ]);

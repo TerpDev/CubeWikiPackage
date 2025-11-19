@@ -251,12 +251,12 @@ class KnowledgeBase extends Page implements HasForms
             return '';
         }
 
-        $html  = '<div class="py-2 text-sm dark:text-gray-300 text-gray-700 space-y-2">';
+        $html  = '<div class="py-2 text-sm space-y-2">';
         $html .= '  <div class="flex flex-col gap-1.5">';
 
         foreach ($this->pageHeadings as $heading) {
             $html .= sprintf(
-                '<a href="#%s" class="block no-underline text-gray-200 hover:bg-white/5 p-2 rounded-lg duration-300 text-md font-medium">%s</a>',
+                '<a href="#%s" class="block no-underline dark:text-gray-200 text-gray-700 hover:bg-white/5 p-2 rounded-lg duration-300 text-md font-medium">%s</a>',
                 e($heading['id']),
                 e($heading['text'])
             );
