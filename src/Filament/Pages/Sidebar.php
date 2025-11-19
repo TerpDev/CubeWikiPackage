@@ -42,12 +42,11 @@ class Sidebar extends Component implements HasForms
                 ->options($this->getAppOptions())
                 ->placeholder('Select application')
                 ->live()
+                ->searchable()
                 ->afterStateUpdated(function ($state) {
                     $this->appId = $state ? (int) $state : null;
-                    // Persist selection so the whole panel (navigation) can use it
                     session(['cubewiki_application_id' => $this->appId]);
 
-                    // Redirect so navigation rebuilds for selected app
                     if ($this->appId) {
                         $this->redirect(url('/cubewiki/knowledge-base?app=' . $this->appId));
                         return;
@@ -59,9 +58,9 @@ class Sidebar extends Component implements HasForms
 
     protected function getFirstAppId(): ?int
     {
-        foreach ($this->allData['applications'] ?? [] as $app) {
-            return (int) ($app['id'] ?? 0) ?: null;
-        }
+//        foreach ($this->allData['applications'] ?? [] as $app) {
+//            return (int) ($app['id'] ?? 0) ?: 'No application selected';
+//        }
         return null;
     }
 

@@ -42,6 +42,8 @@ Add your WikiCube API settings to your `.env` file ():
 WIKICUBE_API_URL=https://wikicube.test
 WIKICUBE_API_TOKEN=your-api-token-here
 WIKICUBE_APPLICATION_NAME=your-application-name
+//application name is for default application you see when 
+clicked the documentation button
 ```
 
 ## Usage

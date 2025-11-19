@@ -18,28 +18,14 @@ class KnowledgeBase extends Page implements HasForms
 
     public ?string $selectedPageContentHtml = null;
 
-    protected $listeners = [
-        'wikicube.selectApp' => 'selectApplication',
-        'wikicube.selectCat' => 'selectCategory',
-        'wikicube.openPage' => 'openPage',
-    ];
-
     protected string $view = 'cubewikipackage::filament.pages.knowledge-base';
 
     public ?array $knowledgeBaseData = null;
     public ?string $apiToken = null;
-    protected static bool $hasPageHeader = false;
-
     public ?int $selectedApplicationId = null;
     public ?int $selectedCategoryId = null;
     public ?int $selectedPageId = null;
     public ?string $selectedPageTitle = null;
-
-    /**
-     * Headings van de huidige pagina (voor TOC rechts)
-     *
-     * @var array<int, array{text:string,level:int,id:string}>
-     */
     public array $pageHeadings = [];
 
     public function mount(): void
@@ -80,7 +66,6 @@ class KnowledgeBase extends Page implements HasForms
 
     public function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {
-        // Geen data → melding
         if (!$this->knowledgeBaseData) {
             return $schema
                 ->schema([
@@ -95,7 +80,6 @@ class KnowledgeBase extends Page implements HasForms
                 ->statePath('formData');
         }
 
-        // Er is een geselecteerde pagina → 2 kolommen: content + TOC
         if ($this->selectedPageContentHtml) {
             return $schema
                 ->schema([
@@ -114,11 +98,10 @@ class KnowledgeBase extends Page implements HasForms
                         ->hiddenLabel()
                         ->columnSpan(['md' => 1, 'lg' => 1])
                         ->visible(fn () => count($this->pageHeadings) > 0)
-                        ->content(fn () => new HtmlString(
-                            '<div class="hidden lg:block border-l border-gray-200 dark:border-gray-800 pl-4 sticky top-24">'
-                            . $this->renderTocHtml() .
-                            '</div>'
-                        )),
+                        ->content(fn () => view('cubewikipackage::components.toc', [
+                            'tocHtml' => $this->renderTocHtml(),
+                        ])),
+
 
 
                 ])
@@ -181,8 +164,8 @@ class KnowledgeBase extends Page implements HasForms
 
         $page = $this->findPageById($pageId);
 
-        $this->selectedPageTitle = $page['title'] ?? 'Untitled';
-        $rawHtml = (string)($page['content_html'] ?? '');
+        $this->selectedPageTitle = $page['title'];
+        $rawHtml = (string)($page['content_html']);
         $this->selectedPageContentHtml = trim($rawHtml) !== ''
             ? $rawHtml
             : '<p class="text-gray-500">No content available.</p>';
