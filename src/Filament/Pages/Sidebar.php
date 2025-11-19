@@ -13,7 +13,7 @@ class Sidebar extends Component implements HasForms
 {
     use InteractsWithForms;
 
-    public ?array $allData = null; // all applications
+    public ?array $allData = null;
     public ?int $appId = null;
     protected ?string $token = null;
     public ?array $formData = [];
@@ -21,9 +21,8 @@ class Sidebar extends Component implements HasForms
     public function mount(): void
     {
         $this->token = session('cubewiki_token');
-        // Prefer query param first, then session value
         $requestedAppId = (int) request()->integer('app');
-        $sessionAppId = (int) (session('cubewiki_application_id') ?? 0);
+        $sessionAppId = (int) (session('cubewiki_application_id'));
         $initialAppId = $requestedAppId ?: $sessionAppId;
 
         if (! $this->token) return;
@@ -58,9 +57,6 @@ class Sidebar extends Component implements HasForms
 
     protected function getFirstAppId(): ?int
     {
-//        foreach ($this->allData['applications'] ?? [] as $app) {
-//            return (int) ($app['id'] ?? 0) ?: 'No application selected';
-//        }
         return null;
     }
 

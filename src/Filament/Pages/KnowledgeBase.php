@@ -66,23 +66,18 @@ class KnowledgeBase extends Page implements HasForms
 
     public function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {
-        if (!$this->knowledgeBaseData) {
-            return $schema
-                ->schema([
-                    Placeholder::make('no_data')
-                        ->hiddenLabel()
-                        ->content(fn() => new HtmlString('
-                            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
-                                <p>Open de Documentation wizard om een API-token en applicatie te selecteren.</p>
-                            </div>
-                        ')),
-                ])
-                ->statePath('formData');
-        }
-
         if ($this->selectedPageContentHtml) {
             return $schema
                 ->schema([
+                    // Breadcrumbs - only show when a page is selected
+                    Placeholder::make('breadcrumbs')
+                        ->hiddenLabel()
+                        ->columnSpan(['md' => 4, 'lg' => 4])
+                        ->visible(fn() => (bool) $this->selectedPageId)
+                        ->content(fn() => view('filament::components.breadcrumbs', [
+                            'breadcrumbs' => $this->getLocalBreadcrumbs(),
+                        ])),
+
                     // Linker kolom: document-content
                     Placeholder::make('page_content')
                         ->hiddenLabel()
@@ -101,9 +96,6 @@ class KnowledgeBase extends Page implements HasForms
                         ->content(fn () => view('cubewikipackage::components.toc', [
                             'tocHtml' => $this->renderTocHtml(),
                         ])),
-
-
-
                 ])
                 ->columns([
                     'md' => 4,
