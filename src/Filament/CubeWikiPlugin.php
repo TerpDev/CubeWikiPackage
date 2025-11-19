@@ -52,9 +52,6 @@ class CubeWikiPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        // knop onderin sidebar
-
-        // help-dropdown in de topbar (rechts naast search)
         FilamentView::registerRenderHook(
             PanelsRenderHook::GLOBAL_SEARCH_AFTER,
             function (): string {

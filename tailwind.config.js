@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+    darkMode: 'class',
     content: [
         './resources/views/**/*.blade.php',
         './src/**/*.php',
@@ -18,6 +19,7 @@ module.exports = {
         'border-l-3',
         'prose',
         'prose-invert',
+        'dark:prose-invert',
         'max-w-none',
         'wk-doc',
     ],
