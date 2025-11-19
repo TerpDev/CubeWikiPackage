@@ -18,28 +18,14 @@ class KnowledgeBase extends Page implements HasForms
 
     public ?string $selectedPageContentHtml = null;
 
-    protected $listeners = [
-        'wikicube.selectApp' => 'selectApplication',
-        'wikicube.selectCat' => 'selectCategory',
-        'wikicube.openPage' => 'openPage',
-    ];
-
     protected string $view = 'cubewikipackage::filament.pages.knowledge-base';
 
     public ?array $knowledgeBaseData = null;
     public ?string $apiToken = null;
-    protected static bool $hasPageHeader = false;
-
     public ?int $selectedApplicationId = null;
     public ?int $selectedCategoryId = null;
     public ?int $selectedPageId = null;
     public ?string $selectedPageTitle = null;
-
-    /**
-     * Headings van de huidige pagina (voor TOC rechts)
-     *
-     * @var array<int, array{text:string,level:int,id:string}>
-     */
     public array $pageHeadings = [];
 
     public function mount(): void
@@ -80,25 +66,18 @@ class KnowledgeBase extends Page implements HasForms
 
     public function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {
-        // Geen data → melding
-        if (!$this->knowledgeBaseData) {
-            return $schema
-                ->schema([
-                    Placeholder::make('no_data')
-                        ->hiddenLabel()
-                        ->content(fn() => new HtmlString('
-                            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
-                                <p>Open de Documentation wizard om een API-token en applicatie te selecteren.</p>
-                            </div>
-                        ')),
-                ])
-                ->statePath('formData');
-        }
-
-        // Er is een geselecteerde pagina → 2 kolommen: content + TOC
         if ($this->selectedPageContentHtml) {
             return $schema
                 ->schema([
+                    // Breadcrumbs - only show when a page is selected
+                    Placeholder::make('breadcrumbs')
+                        ->hiddenLabel()
+                        ->columnSpan(['md' => 4, 'lg' => 4])
+                        ->visible(fn() => (bool) $this->selectedPageId)
+                        ->content(fn() => view('filament::components.breadcrumbs', [
+                            'breadcrumbs' => $this->getLocalBreadcrumbs(),
+                        ])),
+
                     // Linker kolom: document-content
                     Placeholder::make('page_content')
                         ->hiddenLabel()
@@ -114,13 +93,9 @@ class KnowledgeBase extends Page implements HasForms
                         ->hiddenLabel()
                         ->columnSpan(['md' => 1, 'lg' => 1])
                         ->visible(fn () => count($this->pageHeadings) > 0)
-                        ->content(fn () => new HtmlString(
-                            '<div class="hidden lg:block border-l border-gray-200 dark:border-gray-800 pl-4 sticky top-24">'
-                            . $this->renderTocHtml() .
-                            '</div>'
-                        )),
-
-
+                        ->content(fn () => view('cubewikipackage::components.toc', [
+                            'tocHtml' => $this->renderTocHtml(),
+                        ])),
                 ])
                 ->columns([
                     'md' => 4,
@@ -181,8 +156,8 @@ class KnowledgeBase extends Page implements HasForms
 
         $page = $this->findPageById($pageId);
 
-        $this->selectedPageTitle = $page['title'] ?? 'Untitled';
-        $rawHtml = (string)($page['content_html'] ?? '');
+        $this->selectedPageTitle = $page['title'];
+        $rawHtml = (string)($page['content_html']);
         $this->selectedPageContentHtml = trim($rawHtml) !== ''
             ? $rawHtml
             : '<p class="text-gray-500">No content available.</p>';
@@ -251,12 +226,12 @@ class KnowledgeBase extends Page implements HasForms
             return '';
         }
 
-        $html  = '<div class="py-2 text-sm dark:text-gray-300 text-gray-700 space-y-2">';
+        $html  = '<div class="py-2 text-sm space-y-2">';
         $html .= '  <div class="flex flex-col gap-1.5">';
 
         foreach ($this->pageHeadings as $heading) {
             $html .= sprintf(
-                '<a href="#%s" class="block no-underline text-gray-200 hover:bg-white/5 p-2 rounded-lg duration-300 text-md font-medium">%s</a>',
+                '<a href="#%s" class="block no-underline dark:text-gray-200 text-gray-700 hover:bg-white/5 p-2 rounded-lg duration-300 text-md font-medium">%s</a>',
                 e($heading['id']),
                 e($heading['text'])
             );

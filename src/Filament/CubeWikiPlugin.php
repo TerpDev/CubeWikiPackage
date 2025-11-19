@@ -32,22 +32,9 @@ class CubeWikiPlugin implements Plugin
 
         return $this;
     }
-
-    public function hintPages(array $pages): static
-    {
-        self::$hintPages = $pages;
-
-        return $this;
-    }
-
     public static function getImportantPages(): array
     {
         return self::$importantPages;
-    }
-
-    public static function getHintPages(): array
-    {
-        return self::$hintPages;
     }
 
     public function register(Panel $panel): void
