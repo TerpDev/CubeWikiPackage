@@ -59,8 +59,9 @@ class WikiactionButton extends Component implements HasForms, HasActions
                     ->hiddenLabel()
                     ->content(function () {
                         return new HtmlString(
-                            '<div class="prose prose-invert max-w-3xl mx-auto">' .
-                            ($this->contentHtml) .'</div>'
+                            '<div class="prose dark:prose-invert max-w-3xl mx-auto">' .
+                            ($this->contentHtml) .
+                            '</div>'
                         );
                     }),
             ])
@@ -71,7 +72,7 @@ class WikiactionButton extends Component implements HasForms, HasActions
     {
         return Action::make('hint')
             ->label('Hint')
-            ->modal() // gewone modal, geen slideOver
+            ->modal()
             ->modalHeading(fn () => $this->title ?? ($this->label ?? 'Hint'))
             ->modalWidth('md')
             ->form([
@@ -79,9 +80,8 @@ class WikiactionButton extends Component implements HasForms, HasActions
                     ->hiddenLabel()
                     ->content(function () {
                         return new HtmlString(
-                            '<div class="prose prose-invert max-w-2xl mx-auto">' .
-                            ($this->contentHtml
-                                ?? '<p class="text-sm text-gray-500">Geen hint beschikbaar.</p>') .
+                            '<div class="prose dark:prose-invert">' .
+                            ($this->contentHtml) .
                             '</div>'
                         );
                     }),
@@ -160,7 +160,6 @@ class WikiactionButton extends Component implements HasForms, HasActions
 
     public function render()
     {
-        // Hint = klein linkje bij field
         if ($this->variant === 'hint') {
             return view('cubewikipackage::livewire.hintaction', [
                 'label' => $this->label ?? 'Hint',

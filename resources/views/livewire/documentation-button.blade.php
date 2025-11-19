@@ -2,10 +2,7 @@
     <button
         type="button"
         wire:click="mountAction('create')"
-        class="group flex items-center gap-x-2 border border-white m-4
-        rounded-lg px-3 py-2 text-sm font-bold
-        transition duration-200
-        hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
+        class="flex items-center gap-x-2 px-3 py-2 border border-gray-500 rounded-lg hover:border-gray-400 duration-300 ml-3 mb-3"
     >
         <x-filament::icon
             :icon="$icon"

@@ -91,11 +91,10 @@ class KnowledgeBase extends Page implements HasForms
             return $schema->schema([
                 Placeholder::make('page_content')
                     ->hiddenLabel()
-                    ->content(fn() => new HtmlString('<div class="prose prose-invert">' . $this->selectedPageContentHtml . '</div>'))
-                    // table of content fromt headings from content method
-
-
+                    ->content(fn() => new HtmlString('<div class="prose dark:prose-invert">' . $this->selectedPageContentHtml . '</div>'))
             ])->statePath('formData');
+            // toon hier de headings die worden opgehaald vanuit getHeadingsFromContent functie
+
         }
 
             return $schema->schema([
