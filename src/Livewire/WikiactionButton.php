@@ -13,7 +13,6 @@ use Illuminate\Support\HtmlString;
 use Livewire\Component;
 use TerpDev\CubeWikiPackage\Filament\CubeWikiPlugin;
 use TerpDev\CubeWikiPackage\Services\WikiCubeApiService;
-use Illuminate\Support\Facades\Log;
 
 class WikiactionButton extends Component implements HasForms, HasActions
 {
@@ -33,7 +32,6 @@ class WikiactionButton extends Component implements HasForms, HasActions
     // gedeelde state voor modal/slide-over
     public ?string $title = null;
     public ?string $contentHtml = null;
-    public ?string $breadcrumb = null;   // ← eventueel later gebruiken
 
     protected function getPages(): array
     {
@@ -58,13 +56,11 @@ class WikiactionButton extends Component implements HasForms, HasActions
             ->form([
                 Placeholder::make('page_content')
                     ->hiddenLabel()
-                    ->content(function () {
-                        return new HtmlString(
-                            '<div class="prose dark:prose-invert max-w-3xl mx-auto">' .
-                            ($this->contentHtml) .
-                            '</div>'
-                        );
-                    }),
+                    ->content(fn () => new HtmlString(
+                        '<div class="prose dark:prose-invert max-w-3xl mx-auto">' .
+                        ($this->contentHtml) .
+                        '</div>'
+                    )),
             ])
             ->modalSubmitAction(false);
     }
@@ -80,36 +76,26 @@ class WikiactionButton extends Component implements HasForms, HasActions
             ->form([
                 Placeholder::make('hint_content')
                     ->hiddenLabel()
-                    ->content(function () {
-                        return new HtmlString(
-                            '<div class="prose dark:prose-invert">' .
-                            ($this->contentHtml) .
-                            '</div>'
-                        );
-                    }),
+                    ->content(fn () => new HtmlString(
+                        '<div class="prose dark:prose-invert">' .
+                        ($this->contentHtml) .
+                        '</div>'
+                    )),
             ])
             ->modalSubmitAction(false);
     }
 
-    /**
-     * Haal de API-token op:
-     * - eerst uit de sessie
-     * - anders uit config / .env
-     * En zet 'm dan meteen in de sessie voor later gebruik.
-     */
     protected function resolveApiToken(): ?string
     {
         $token = session('cubewiki_token');
 
-        if ($token) {
-            return $token;
-        }
+        if (! $token) {
+            $token = config('cubewikipackage.token')
+                ?? env('CUBEWIKI_TOKEN');
 
-        $token = config('cubewiki.token')
-            ?? env('CUBEWIKI_TOKEN');
-
-        if ($token) {
-            session(['cubewiki_token' => $token]);
+            if ($token) {
+                session(['cubewiki_token' => $token]);
+            }
         }
 
         return $token ?: null;
@@ -117,6 +103,7 @@ class WikiactionButton extends Component implements HasForms, HasActions
 
     public function openBySlug(string $slug): void
     {
+        // Voor help-variant: check of slug geregistreerd is bij importantPages
         if ($this->variant === 'help') {
             $pluginPages     = CubeWikiPlugin::getImportantPages();
             $registeredSlugs = array_filter(array_map(fn ($p) => $p['slug'] ?? null, $pluginPages));
@@ -133,23 +120,22 @@ class WikiactionButton extends Component implements HasForms, HasActions
         }
 
         $token = $this->resolveApiToken();
-        $appId = session('cubewiki_application_id');
 
         if (! $token) {
             Notification::make()
                 ->warning()
                 ->title('Geen API-token')
-                ->body('Geen API-token beschikbaar. Controleer de CUBEWIKI_TOKEN in je .env.')
+                ->body('Geen API-token beschikbaar. Stel CUBEWIKI_TOKEN in je .env in.')
                 ->send();
 
             return;
         }
 
-        // 3. Data ophalen van de API
-        $service        = app(WikiCubeApiService::class);
-        $appIdForRequest = $this->variant === 'hint' ? null : $appId; // hint = alle apps
+        $service = app(WikiCubeApiService::class);
 
-        $data  = $service->fetchKnowledgeBase($token, $appIdForRequest);
+        // BELANGRIJK: altijd alle applicaties ophalen
+        $data = $service->fetchKnowledgeBase($token, null);
+
         $found = null;
 
         foreach ($data['applications'] ?? [] as $app) {
@@ -179,7 +165,6 @@ class WikiactionButton extends Component implements HasForms, HasActions
         $this->contentHtml = $found['content_html']
             ?? ($found['content'] ?? '<p class="text-sm text-gray-500">Geen content beschikbaar.</p>');
 
-        // 4. Juiste action openen
         if ($this->variant === 'hint') {
             $this->mountAction('hint');
         } else {

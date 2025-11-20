@@ -14,35 +14,39 @@ class Sidebar extends Component implements HasForms
     use InteractsWithForms;
 
     public ?array $allData = null;
-    public ?int $appId = null;
     public ?string $appName = null;
-    protected ?string $token = null;
+    public ?int $appId = null;
     public ?array $formData = [];
+
+    protected ?string $token = null;
 
     public function mount(): void
     {
-        $this->token = session('cubewiki_token');
+        $this->token = session('cubewiki_token')
+            ?? config('cubewikipackage.token')
+            ?? env('CUBEWIKI_TOKEN');
 
         if (! $this->token) {
             return;
         }
 
+        // Zorg dat token ook in de sessie staat
+        session(['cubewiki_token' => $this->token]);
+
         $service       = app(WikiCubeApiService::class);
         $this->allData = $service->fetchKnowledgeBase($this->token, null);
 
-        // URL: ?app=naam
-        $appParam        = request()->query('app');
-        $sessionAppName  = session('cubewiki_application_name');
+        $appParam       = request()->query('app');
+        $sessionAppName = session('cubewiki_application_name');
+
         $resolvedAppName = null;
 
         if (! empty($appParam) && $this->appNameExists($appParam)) {
             $resolvedAppName = $this->normalizeAppName($appParam);
-        }
-        elseif (! empty($sessionAppName) && $this->appNameExists($sessionAppName)) {
+        } elseif (! empty($sessionAppName) && $this->appNameExists($sessionAppName)) {
             $resolvedAppName = $this->normalizeAppName($sessionAppName);
-        }
-        else {
-            $resolvedAppName = $this->getFirstAppName();
+        } else {
+            $resolvedAppName = null; // geen auto-select → placeholder
         }
 
         $this->appName = $resolvedAppName;
@@ -57,6 +61,7 @@ class Sidebar extends Component implements HasForms
             $this->form->fill(['appId' => $this->appName]);
         }
     }
+
     protected function appNameExists(string $name): bool
     {
         foreach ($this->allData['applications'] ?? [] as $app) {
@@ -72,7 +77,7 @@ class Sidebar extends Component implements HasForms
     {
         foreach ($this->allData['applications'] ?? [] as $app) {
             if (isset($app['name']) && strcasecmp($app['name'], $name) === 0) {
-                return $app['name']; // originele casing
+                return $app['name'];
             }
         }
 
@@ -93,15 +98,6 @@ class Sidebar extends Component implements HasForms
 
         return null;
     }
-    protected function getFirstAppName(): ?string
-    {
-        foreach ($this->allData['applications'] ?? [] as $app) {
-            if (isset($app['name'])) {
-                return 'Select an application';
-            }
-        }
-        return null;
-    }
 
     public function form(Schema $schema): Schema
     {
@@ -113,7 +109,6 @@ class Sidebar extends Component implements HasForms
                 ->live()
                 ->searchable()
                 ->afterStateUpdated(function ($state) {
-                    // $state is nu de NAAM van de app
                     $this->appName = $state ?: null;
                     $this->appId   = $this->appName ? $this->getAppIdByName($this->appName) : null;
 
@@ -127,7 +122,7 @@ class Sidebar extends Component implements HasForms
                         return;
                     }
 
-                    $this->redirect(url('/cubewiki/knowledge-base'));
+//                    $this->redirect(url('/cubewiki/knowledge-base'));
                 }),
         ])->statePath('formData');
     }

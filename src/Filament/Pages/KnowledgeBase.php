@@ -32,9 +32,9 @@ class KnowledgeBase extends Page implements HasForms
 
     public function mount(): void
     {
-        $sessionToken     = session('cubewiki_token');
-        $sessionAppId     = session('cubewiki_application_id');
-        $sessionAppName   = session('cubewiki_application_name');
+        $sessionToken   = session('cubewiki_token');
+        $sessionAppId   = session('cubewiki_application_id');
+        $sessionAppName = session('cubewiki_application_name');
 
         if (! $sessionToken) {
             Notification::make()
@@ -49,13 +49,12 @@ class KnowledgeBase extends Page implements HasForms
         $this->apiToken = $sessionToken;
 
         $service = app(WikiCubeApiService::class);
-
         $this->knowledgeBaseData = $service->fetchKnowledgeBase($sessionToken, null);
 
         // URL-parameters
-        $appParam  = request()->query('app');          // naam of id
-        $qCat      = (int) request()->query('cat', 0); // categorie-id
-        $qPage     = (int) request()->query('page', 0);// page-id
+        $appParam = request()->query('app');           // naam of id
+        $qCat     = (int) request()->query('cat', 0);  // categorie-id
+        $qPage    = (int) request()->query('page', 0); // page-id
 
         $resolvedAppId = null;
 
@@ -73,13 +72,6 @@ class KnowledgeBase extends Page implements HasForms
 
         if ($resolvedAppId) {
             $this->selectApplication($resolvedAppId);
-
-            if ($app = $this->getApplicationById($resolvedAppId)) {
-                session([
-                    'cubewiki_application_id'   => $resolvedAppId,
-                    'cubewiki_application_name' => $app['name'] ?? null,
-                ]);
-            }
         }
 
         if ($qCat) {
@@ -152,23 +144,36 @@ class KnowledgeBase extends Page implements HasForms
 
     public function selectApplication(?int $appId): void
     {
-        $this->selectedApplicationId  = $appId ?: null;
-        $this->selectedCategoryId     = null;
-        $this->selectedPageId         = null;
-        $this->selectedPageTitle      = null;
+        $this->selectedApplicationId   = $appId ?: null;
+        $this->selectedCategoryId      = null;
+        $this->selectedPageId          = null;
+        $this->selectedPageTitle       = null;
         $this->selectedPageContentHtml = null;
-        $this->pageHeadings           = [];
+        $this->pageHeadings            = [];
 
-        // GEEN nieuwe API-call meer – we hebben alle apps al in $knowledgeBaseData
+        // Sessie ook bijwerken (handig i.c.m. Sidebar / opnieuw openen)
+        if ($this->selectedApplicationId) {
+            $app = $this->getApplicationById($this->selectedApplicationId);
+
+            session([
+                'cubewiki_application_id'   => $this->selectedApplicationId,
+                'cubewiki_application_name' => $app['name'] ?? null,
+            ]);
+        } else {
+            session([
+                'cubewiki_application_id'   => null,
+                'cubewiki_application_name' => null,
+            ]);
+        }
     }
 
     public function selectCategory(?int $categoryId): void
     {
-        $this->selectedCategoryId     = $categoryId ?: null;
-        $this->selectedPageId         = null;
-        $this->selectedPageTitle      = null;
+        $this->selectedCategoryId      = $categoryId ?: null;
+        $this->selectedPageId          = null;
+        $this->selectedPageTitle       = null;
         $this->selectedPageContentHtml = null;
-        $this->pageHeadings           = [];
+        $this->pageHeadings            = [];
     }
 
     public function openPage(int $pageId): void
@@ -268,17 +273,31 @@ class KnowledgeBase extends Page implements HasForms
 
     public function getSelectedApplication(): ?array
     {
+        if (! $this->selectedApplicationId) {
+            return null;
+        }
+
         return collect($this->knowledgeBaseData['applications'] ?? [])
             ->firstWhere('id', $this->selectedApplicationId);
     }
 
     public function getCategoriesForSelectedApp(): array
     {
-        return $this->getSelectedApplication()['categories'] ?? [];
+        $app = $this->getSelectedApplication();
+
+        if (! $app) {
+            return [];
+        }
+
+        return $app['categories'] ?? [];
     }
 
     public function getSelectedCategory(): ?array
     {
+        if (! $this->selectedCategoryId) {
+            return null;
+        }
+
         return collect($this->getCategoriesForSelectedApp())
             ->firstWhere('id', $this->selectedCategoryId);
     }
@@ -350,7 +369,7 @@ class KnowledgeBase extends Page implements HasForms
         }
 
         if ($this->selectedCategoryId && ($category = $this->getSelectedCategory())) {
-            $app = $this->getSelectedApplication();
+            $app     = $this->getSelectedApplication();
             $appName = $app['name'] ?? 'Applicatie';
 
             $breadcrumbs[static::getUrl([
