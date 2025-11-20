@@ -13,6 +13,7 @@ use Illuminate\Support\HtmlString;
 use Livewire\Component;
 use TerpDev\CubeWikiPackage\Filament\CubeWikiPlugin;
 use TerpDev\CubeWikiPackage\Services\WikiCubeApiService;
+use Illuminate\Support\Facades\Log;
 
 class WikiactionButton extends Component implements HasForms, HasActions
 {
@@ -32,7 +33,7 @@ class WikiactionButton extends Component implements HasForms, HasActions
     // gedeelde state voor modal/slide-over
     public ?string $title = null;
     public ?string $contentHtml = null;
-    public ?string $breadcrumb = null;   // ← nieuw
+    public ?string $breadcrumb = null;   // ← eventueel later gebruiken
 
     protected function getPages(): array
     {
@@ -90,10 +91,34 @@ class WikiactionButton extends Component implements HasForms, HasActions
             ->modalSubmitAction(false);
     }
 
+    /**
+     * Haal de API-token op:
+     * - eerst uit de sessie
+     * - anders uit config / .env
+     * En zet 'm dan meteen in de sessie voor later gebruik.
+     */
+    protected function resolveApiToken(): ?string
+    {
+        $token = session('cubewiki_token');
+
+        if ($token) {
+            return $token;
+        }
+
+        $token = config('cubewiki.token')
+            ?? env('CUBEWIKI_TOKEN');
+
+        if ($token) {
+            session(['cubewiki_token' => $token]);
+        }
+
+        return $token ?: null;
+    }
+
     public function openBySlug(string $slug): void
     {
         if ($this->variant === 'help') {
-            $pluginPages = CubeWikiPlugin::getImportantPages();
+            $pluginPages     = CubeWikiPlugin::getImportantPages();
             $registeredSlugs = array_filter(array_map(fn ($p) => $p['slug'] ?? null, $pluginPages));
 
             if (! in_array($slug, $registeredSlugs, true)) {
@@ -107,21 +132,24 @@ class WikiactionButton extends Component implements HasForms, HasActions
             }
         }
 
-        $token = session('cubewiki_token');
+        $token = $this->resolveApiToken();
         $appId = session('cubewiki_application_id');
 
         if (! $token) {
             Notification::make()
                 ->warning()
                 ->title('Geen API-token')
-                ->body('Geen API-token beschikbaar. Open eerst de Documentation wizard.')
+                ->body('Geen API-token beschikbaar. Controleer de CUBEWIKI_TOKEN in je .env.')
                 ->send();
 
             return;
         }
 
-        $service = app(WikiCubeApiService::class);
-        $data = $service->fetchKnowledgeBase($token, $appId);
+        // 3. Data ophalen van de API
+        $service        = app(WikiCubeApiService::class);
+        $appIdForRequest = $this->variant === 'hint' ? null : $appId; // hint = alle apps
+
+        $data  = $service->fetchKnowledgeBase($token, $appIdForRequest);
         $found = null;
 
         foreach ($data['applications'] ?? [] as $app) {
@@ -147,11 +175,11 @@ class WikiactionButton extends Component implements HasForms, HasActions
             return;
         }
 
-        $this->title = $found['title'] ?? ($found['name']);
+        $this->title = $found['title'] ?? ($found['name'] ?? 'Help');
         $this->contentHtml = $found['content_html']
             ?? ($found['content'] ?? '<p class="text-sm text-gray-500">Geen content beschikbaar.</p>');
 
-        // Bepaal welke action we mounten
+        // 4. Juiste action openen
         if ($this->variant === 'hint') {
             $this->mountAction('hint');
         } else {

@@ -97,10 +97,9 @@ class Sidebar extends Component implements HasForms
     {
         foreach ($this->allData['applications'] ?? [] as $app) {
             if (isset($app['name'])) {
-                return $app['name'];
+                return 'Select an application';
             }
         }
-
         return null;
     }
 
