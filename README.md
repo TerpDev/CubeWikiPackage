@@ -5,20 +5,17 @@
 
 A beautiful Filament plugin to display your WikiCube knowledge base content directly in your admin panel. Users can connect to different tenants using API tokens and browse their knowledge base with a clean, organized interface.
 
-## Features
-
-- 🔐 **Multi-tenant support** - Users can enter their own API tokens to switch between tenants
-- 📚 **Beautiful UI** - Native Filament components for a seamless experience
-- 🚀 **Smart caching** - Automatic caching of API responses for better performance
-- 🔄 **Easy refresh** - Clear cache and reload data with one click
-- 🎨 **Customizable** - Configure navigation groups, sort order, and more
-- 💪 **Filament v4** - Built for the latest Filament version
-
+## Showcase
+//coming
 ## Requirements
 
 - PHP 8.1+
 - Laravel 11.28+
 - Filament v4.0+
+
+## Introdocution
+
+This package allows you to integrate your WikiCube knowledge base directly into your Filament admin panel.
 
 ## Installation
 
@@ -26,12 +23,6 @@ Install the package via composer:
 
 ```bash
 composer require terpdev/cubewikipackage
-```
-
-Publish the config file (optional):
-
-```bash
-php artisan vendor:publish --tag="cubewikipackage-config"
 ```
 
 ## Configuration
@@ -47,6 +38,9 @@ clicked the documentation button
 ```
 
 ## Usage
+When you have installed the package, you will see a documentation button on the 
+bottom of your sidebar which will lead you to the knowledge base panel where you can see
+your content.
 
 ### Registration (Advanced)
 

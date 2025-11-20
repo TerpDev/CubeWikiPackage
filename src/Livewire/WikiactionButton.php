@@ -32,7 +32,6 @@ class WikiactionButton extends Component implements HasForms, HasActions
     // gedeelde state voor modal/slide-over
     public ?string $title = null;
     public ?string $contentHtml = null;
-    public ?string $breadcrumb = null;   // ← nieuw
 
     protected function getPages(): array
     {
@@ -57,13 +56,11 @@ class WikiactionButton extends Component implements HasForms, HasActions
             ->form([
                 Placeholder::make('page_content')
                     ->hiddenLabel()
-                    ->content(function () {
-                        return new HtmlString(
-                            '<div class="prose dark:prose-invert max-w-3xl mx-auto">' .
-                            ($this->contentHtml) .
-                            '</div>'
-                        );
-                    }),
+                    ->content(fn () => new HtmlString(
+                        '<div class="prose dark:prose-invert max-w-3xl mx-auto">' .
+                        ($this->contentHtml) .
+                        '</div>'
+                    )),
             ])
             ->modalSubmitAction(false);
     }
@@ -79,21 +76,36 @@ class WikiactionButton extends Component implements HasForms, HasActions
             ->form([
                 Placeholder::make('hint_content')
                     ->hiddenLabel()
-                    ->content(function () {
-                        return new HtmlString(
-                            '<div class="prose dark:prose-invert">' .
-                            ($this->contentHtml) .
-                            '</div>'
-                        );
-                    }),
+                    ->content(fn () => new HtmlString(
+                        '<div class="prose dark:prose-invert">' .
+                        ($this->contentHtml) .
+                        '</div>'
+                    )),
             ])
             ->modalSubmitAction(false);
     }
 
+    protected function resolveApiToken(): ?string
+    {
+        $token = session('cubewiki_token');
+
+        if (! $token) {
+            $token = config('cubewikipackage.token')
+                ?? env('CUBEWIKI_TOKEN');
+
+            if ($token) {
+                session(['cubewiki_token' => $token]);
+            }
+        }
+
+        return $token ?: null;
+    }
+
     public function openBySlug(string $slug): void
     {
+        // Voor help-variant: check of slug geregistreerd is bij importantPages
         if ($this->variant === 'help') {
-            $pluginPages = CubeWikiPlugin::getImportantPages();
+            $pluginPages     = CubeWikiPlugin::getImportantPages();
             $registeredSlugs = array_filter(array_map(fn ($p) => $p['slug'] ?? null, $pluginPages));
 
             if (! in_array($slug, $registeredSlugs, true)) {
@@ -107,21 +119,23 @@ class WikiactionButton extends Component implements HasForms, HasActions
             }
         }
 
-        $token = session('cubewiki_token');
-        $appId = session('cubewiki_application_id');
+        $token = $this->resolveApiToken();
 
         if (! $token) {
             Notification::make()
                 ->warning()
                 ->title('Geen API-token')
-                ->body('Geen API-token beschikbaar. Open eerst de Documentation wizard.')
+                ->body('Geen API-token beschikbaar. Stel CUBEWIKI_TOKEN in je .env in.')
                 ->send();
 
             return;
         }
 
         $service = app(WikiCubeApiService::class);
-        $data = $service->fetchKnowledgeBase($token, $appId);
+
+        // BELANGRIJK: altijd alle applicaties ophalen
+        $data = $service->fetchKnowledgeBase($token, null);
+
         $found = null;
 
         foreach ($data['applications'] ?? [] as $app) {
@@ -147,11 +161,10 @@ class WikiactionButton extends Component implements HasForms, HasActions
             return;
         }
 
-        $this->title = $found['title'] ?? ($found['name']);
+        $this->title = $found['title'] ?? ($found['name'] ?? 'Help');
         $this->contentHtml = $found['content_html']
             ?? ($found['content'] ?? '<p class="text-sm text-gray-500">Geen content beschikbaar.</p>');
 
-        // Bepaal welke action we mounten
         if ($this->variant === 'hint') {
             $this->mountAction('hint');
         } else {

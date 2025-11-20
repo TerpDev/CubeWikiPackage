@@ -10,10 +10,8 @@ use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Blade;
 use Livewire\Livewire;
-use Livewire\Features\SupportTesting\Testable;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -21,13 +19,11 @@ use TerpDev\CubeWikiPackage\Commands\CubeWikiPackageCommand;
 use TerpDev\CubeWikiPackage\Filament\Pages\Sidebar;
 use TerpDev\CubeWikiPackage\Livewire\DocumentationButton;
 use TerpDev\CubeWikiPackage\Livewire\WikiactionButton;
-use TerpDev\CubeWikiPackage\Testing\TestsCubeWikiPackage;
 
 class CubeWikiPackageServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'cubewikipackage';
     public static string $cubeWikiPanelPath = 'cubewiki';
-
     public static string $viewNamespace = 'cubewikipackage';
 
     public function configurePackage(Package $package): void
@@ -67,18 +63,21 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
-        // Register Livewire components
+        // Livewire components
         Livewire::component('cubewikipackage-helpaction', WikiactionButton::class);
         Livewire::component('cubewikipackage-hintaction', WikiactionButton::class);
         Livewire::component('cubewikipackage-documentation-button', DocumentationButton::class);
-
         Livewire::component('cubewiki-sidebar', Sidebar::class);
+
+        // Zorg dat token / default app direct in de sessie staan
+        $this->ensureCubeWikiSessionDefaults();
 
         // Asset Registration
         FilamentAsset::register(
             $this->getAssets(),
             $this->getAssetPackageName()
         );
+
         FilamentView::registerRenderHook(
             PanelsRenderHook::SIDEBAR_FOOTER,
             function (): string {
@@ -97,12 +96,39 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
             $this->getAssetPackageName()
         );
 
-        // Icon Registration
+        // Icons
         FilamentIcon::register($this->getIcons());
-//        $this->publishes([
-//            __DIR__.'/../resources/css/theme.css' => public_path('vendor/cubewiki/theme.css'),
-//        ], 'cubewiki-assets');
+    }
 
+    protected function ensureCubeWikiSessionDefaults(): void
+    {
+        if ($this->app->runningInConsole()) {
+            return;
+        }
+
+        // Token uit sessie of config / .env
+        $token = session('cubewiki_token');
+
+        if (! $token) {
+            $token = config('cubewikipackage.token')
+                ?? env('CUBEWIKI_TOKEN');
+
+            if ($token) {
+                session(['cubewiki_token' => $token]);
+            }
+        }
+
+        // Optioneel: default applicatie-naam uit config / .env
+        $appName = session('cubewiki_application_name');
+
+        if (! $appName) {
+            $appName = config('cubewikipackage.default_application')
+                ?? env('CUBEWIKI_APPLICATION');
+
+            if ($appName) {
+                session(['cubewiki_application_name' => $appName]);
+            }
+        }
     }
 
     protected function getAssetPackageName(): ?string
@@ -165,4 +191,3 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
         ];
     }
 }
-

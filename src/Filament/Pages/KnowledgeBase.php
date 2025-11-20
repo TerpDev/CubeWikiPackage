@@ -7,6 +7,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -16,12 +17,13 @@ class KnowledgeBase extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    public ?string $selectedPageContentHtml = null;
-
     protected string $view = 'cubewikipackage::filament.pages.knowledge-base';
+
+    public ?string $selectedPageContentHtml = null;
 
     public ?array $knowledgeBaseData = null;
     public ?string $apiToken = null;
+
     public ?int $selectedApplicationId = null;
     public ?int $selectedCategoryId = null;
     public ?int $selectedPageId = null;
@@ -30,14 +32,15 @@ class KnowledgeBase extends Page implements HasForms
 
     public function mount(): void
     {
-        $sessionToken = session('cubewiki_token');
-        $sessionAppId = session('cubewiki_application_id');
+        $sessionToken   = session('cubewiki_token');
+        $sessionAppId   = session('cubewiki_application_id');
+        $sessionAppName = session('cubewiki_application_name');
 
-        if (!$sessionToken) {
+        if (! $sessionToken) {
             Notification::make()
                 ->info()
                 ->title('Geen API-token gevonden')
-                ->body('Open de Documentatie-wizard om een token en applicatie te kiezen.')
+                ->body('Open eerst de documentatie button.')
                 ->send();
 
             return;
@@ -46,19 +49,35 @@ class KnowledgeBase extends Page implements HasForms
         $this->apiToken = $sessionToken;
 
         $service = app(WikiCubeApiService::class);
-        $this->knowledgeBaseData = $service->fetchKnowledgeBase($sessionToken, $sessionAppId);
-        $this->selectedApplicationId = $sessionAppId ? (int)$sessionAppId : null;
+        $this->knowledgeBaseData = $service->fetchKnowledgeBase($sessionToken, null);
 
-        $qApp = (int)request()->query('app', 0);
-        $qCat = (int)request()->query('cat', 0);
-        $qPage = (int)request()->query('page', 0);
+        // URL-parameters
+        $appParam = request()->query('app');           // naam of id
+        $qCat     = (int) request()->query('cat', 0);  // categorie-id
+        $qPage    = (int) request()->query('page', 0); // page-id
 
-        if ($qApp) {
-            $this->selectApplication($qApp);
+        $resolvedAppId = null;
+
+        if (! empty($appParam)) {
+            if (is_numeric($appParam)) {
+                $resolvedAppId = (int) $appParam;
+            } else {
+                $resolvedAppId = $this->getAppIdByName($appParam);
+            }
+        } elseif ($sessionAppId && $this->appExistsById((int) $sessionAppId)) {
+            $resolvedAppId = (int) $sessionAppId;
+        } elseif ($sessionAppName && ($id = $this->getAppIdByName($sessionAppName))) {
+            $resolvedAppId = $id;
         }
+
+        if ($resolvedAppId) {
+            $this->selectApplication($resolvedAppId);
+        }
+
         if ($qCat) {
             $this->selectCategory($qCat);
         }
+
         if ($qPage) {
             $this->openPage($qPage);
         }
@@ -69,26 +88,26 @@ class KnowledgeBase extends Page implements HasForms
         if ($this->selectedPageContentHtml) {
             return $schema
                 ->schema([
-                    // Breadcrumbs - only show when a page is selected
+                    // Breadcrumbs - alleen tonen als er een pagina actief is
                     Placeholder::make('breadcrumbs')
                         ->hiddenLabel()
                         ->columnSpan(['md' => 4, 'lg' => 4])
-                        ->visible(fn() => (bool) $this->selectedPageId)
-                        ->content(fn() => view('filament::components.breadcrumbs', [
+                        ->visible(fn () => (bool) $this->selectedPageId)
+                        ->content(fn () => view('filament::components.breadcrumbs', [
                             'breadcrumbs' => $this->getLocalBreadcrumbs(),
                         ])),
 
-                    // Linker kolom: document-content
+                    // Linkerkolom: content
                     Placeholder::make('page_content')
                         ->hiddenLabel()
                         ->columnSpan(['md' => 3, 'lg' => 3])
-                        ->content(fn() => new HtmlString(
+                        ->content(fn () => new HtmlString(
                             '<div class="prose dark:prose-invert pt-4">'
                             . $this->selectedPageContentHtml .
                             '</div>'
                         )),
 
-                    // Rechter kolom: TOC
+                    // Rechterkolom: TOC
                     Placeholder::make('toc')
                         ->hiddenLabel()
                         ->columnSpan(['md' => 1, 'lg' => 1])
@@ -104,12 +123,12 @@ class KnowledgeBase extends Page implements HasForms
                 ->statePath('formData');
         }
 
-        // Nog geen pagina gekozen
+        // Geen pagina gekozen
         return $schema
             ->schema([
                 Placeholder::make('welcome')
                     ->hiddenLabel()
-                    ->content(fn() => new HtmlString('
+                    ->content(fn () => new HtmlString('
                         <div class="text-center py-12">
                             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
                                 Choose a page to read
@@ -125,29 +144,36 @@ class KnowledgeBase extends Page implements HasForms
 
     public function selectApplication(?int $appId): void
     {
-        $this->selectedApplicationId = $appId ?: null;
-        $this->selectedCategoryId = null;
-        $this->selectedPageId = null;
-        $this->selectedPageTitle = null;
+        $this->selectedApplicationId   = $appId ?: null;
+        $this->selectedCategoryId      = null;
+        $this->selectedPageId          = null;
+        $this->selectedPageTitle       = null;
         $this->selectedPageContentHtml = null;
-        $this->pageHeadings = [];
+        $this->pageHeadings            = [];
 
-        if ($this->apiToken && $this->selectedApplicationId) {
-            $service = app(WikiCubeApiService::class);
-            $this->knowledgeBaseData = $service->fetchKnowledgeBase(
-                $this->apiToken,
-                $this->selectedApplicationId
-            );
+        // Sessie ook bijwerken (handig i.c.m. Sidebar / opnieuw openen)
+        if ($this->selectedApplicationId) {
+            $app = $this->getApplicationById($this->selectedApplicationId);
+
+            session([
+                'cubewiki_application_id'   => $this->selectedApplicationId,
+                'cubewiki_application_name' => $app['name'] ?? null,
+            ]);
+        } else {
+            session([
+                'cubewiki_application_id'   => null,
+                'cubewiki_application_name' => null,
+            ]);
         }
     }
 
     public function selectCategory(?int $categoryId): void
     {
-        $this->selectedCategoryId = $categoryId ?: null;
-        $this->selectedPageId = null;
-        $this->selectedPageTitle = null;
+        $this->selectedCategoryId      = $categoryId ?: null;
+        $this->selectedPageId          = null;
+        $this->selectedPageTitle       = null;
         $this->selectedPageContentHtml = null;
-        $this->pageHeadings = [];
+        $this->pageHeadings            = [];
     }
 
     public function openPage(int $pageId): void
@@ -156,13 +182,16 @@ class KnowledgeBase extends Page implements HasForms
 
         $page = $this->findPageById($pageId);
 
-        $this->selectedPageTitle = $page['title'];
-        $rawHtml = (string)($page['content_html']);
+        if (! $page) {
+            return;
+        }
+
+        $this->selectedPageTitle = $page['title'] ?? 'Page';
+        $rawHtml = (string) ($page['content_html'] ?? '');
         $this->selectedPageContentHtml = trim($rawHtml) !== ''
             ? $rawHtml
             : '<p class="text-gray-500">No content available.</p>';
 
-        // Headings verwerken (id's + TOC)
         $this->processHeadings();
 
         Log::debug('cubewiki.headings', $this->pageHeadings);
@@ -172,7 +201,7 @@ class KnowledgeBase extends Page implements HasForms
     {
         $this->pageHeadings = [];
 
-        if (!$this->selectedPageContentHtml) {
+        if (! $this->selectedPageContentHtml) {
             return;
         }
 
@@ -196,9 +225,8 @@ class KnowledgeBase extends Page implements HasForms
                 $node->setAttribute('id', $id);
             }
 
-            // bestaand class-attribuut ophalen en scroll-mt-24 toevoegen
             $existingClass = $node->getAttribute('class') ?? '';
-            $newClass = trim($existingClass . ' scroll-mt-24');
+            $newClass      = trim($existingClass . ' scroll-mt-24');
             $node->setAttribute('class', $newClass);
 
             $this->pageHeadings[] = [
@@ -245,17 +273,31 @@ class KnowledgeBase extends Page implements HasForms
 
     public function getSelectedApplication(): ?array
     {
+        if (! $this->selectedApplicationId) {
+            return null;
+        }
+
         return collect($this->knowledgeBaseData['applications'] ?? [])
             ->firstWhere('id', $this->selectedApplicationId);
     }
 
     public function getCategoriesForSelectedApp(): array
     {
-        return $this->getSelectedApplication()['categories'] ?? [];
+        $app = $this->getSelectedApplication();
+
+        if (! $app) {
+            return [];
+        }
+
+        return $app['categories'] ?? [];
     }
 
     public function getSelectedCategory(): ?array
     {
+        if (! $this->selectedCategoryId) {
+            return null;
+        }
+
         return collect($this->getCategoriesForSelectedApp())
             ->firstWhere('id', $this->selectedCategoryId);
     }
@@ -273,6 +315,41 @@ class KnowledgeBase extends Page implements HasForms
         return null;
     }
 
+    // ---- Helpers om op naam/id te kunnen resolven ----
+
+    protected function getAppIdByName(string $name): ?int
+    {
+        foreach ($this->knowledgeBaseData['applications'] ?? [] as $app) {
+            if (isset($app['name']) && strcasecmp($app['name'], $name) === 0) {
+                return isset($app['id']) ? (int) $app['id'] : null;
+            }
+        }
+
+        return null;
+    }
+
+    protected function appExistsById(int $id): bool
+    {
+        foreach ($this->knowledgeBaseData['applications'] ?? [] as $app) {
+            if (isset($app['id']) && (int) $app['id'] === $id) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function getApplicationById(int $id): ?array
+    {
+        foreach ($this->knowledgeBaseData['applications'] ?? [] as $app) {
+            if (isset($app['id']) && (int) $app['id'] === $id) {
+                return $app;
+            }
+        }
+
+        return null;
+    }
+
     public function getBreadcrumbs(): array
     {
         return [];
@@ -283,14 +360,20 @@ class KnowledgeBase extends Page implements HasForms
         $breadcrumbs = [];
 
         if ($this->selectedApplicationId && ($app = $this->getSelectedApplication())) {
+            // Gebruik NAAM in de URL i.p.v. id
+            $appName = $app['name'] ?? 'Applicatie';
+
             $breadcrumbs[static::getUrl([
-                'app' => $app['id'],
-            ])] = $app['name'] ?? 'Applicatie';
+                'app' => $appName,
+            ])] = $appName;
         }
 
         if ($this->selectedCategoryId && ($category = $this->getSelectedCategory())) {
+            $app     = $this->getSelectedApplication();
+            $appName = $app['name'] ?? 'Applicatie';
+
             $breadcrumbs[static::getUrl([
-                'app' => $this->selectedApplicationId,
+                'app' => $appName,
                 'cat' => $category['id'],
             ])] = $category['name'] ?? 'Categorie';
         }
@@ -302,7 +385,7 @@ class KnowledgeBase extends Page implements HasForms
         return $breadcrumbs;
     }
 
-    public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public function getHeading(): string|Htmlable|null
     {
         return null;
     }
