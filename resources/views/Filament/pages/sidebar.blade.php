@@ -1,3 +1,3 @@
-<div class="px-3 py-2">
+<div class="py-2">
     {{ $this->form }}
 </div>

@@ -18,18 +18,11 @@ class WikiactionButton extends Component implements HasForms, HasActions
 {
     use InteractsWithForms;
     use InteractsWithActions;
-
-    /**
-     * help = grote help dropdown in de topbar (slide-over)
-     * hint = klein tekstlinkje / modal bij een formulier-veld
-     */
     public string $variant = 'help';
 
-    // voor hint-variant (per veld)
     public ?string $slug = null;
     public ?string $label = null;
 
-    // gedeelde state voor modal/slide-over
     public ?string $title = null;
     public ?string $contentHtml = null;
 
@@ -65,7 +58,7 @@ class WikiactionButton extends Component implements HasForms, HasActions
             ->modalSubmitAction(false);
     }
 
-    protected function hintAction(): Action
+    protected static function hintAction(): Action
     {
         return Action::make('hint')
             ->label('Hint')
@@ -103,7 +96,6 @@ class WikiactionButton extends Component implements HasForms, HasActions
 
     public function openBySlug(string $slug): void
     {
-        // Voor help-variant: check of slug geregistreerd is bij importantPages
         if ($this->variant === 'help') {
             $pluginPages     = CubeWikiPlugin::getImportantPages();
             $registeredSlugs = array_filter(array_map(fn ($p) => $p['slug'] ?? null, $pluginPages));
@@ -133,7 +125,6 @@ class WikiactionButton extends Component implements HasForms, HasActions
 
         $service = app(WikiCubeApiService::class);
 
-        // BELANGRIJK: altijd alle applicaties ophalen
         $data = $service->fetchKnowledgeBase($token, null);
 
         $found = null;
