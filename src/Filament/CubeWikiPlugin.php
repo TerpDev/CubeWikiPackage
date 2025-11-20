@@ -15,10 +15,8 @@ class CubeWikiPlugin implements Plugin
     public static string $buttonLabel = 'Documentation';
     public static string $buttonIcon = 'heroicon-o-book-open';
 
-    // pages voor de grote help-knop
     public static array $importantPages = [];
 
-    // optioneel: mapping voor hints, nog niet strikt nodig maar alvast aanwezig
     public static array $hintPages = [];
 
     public function getId(): string

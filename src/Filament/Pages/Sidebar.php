@@ -13,25 +13,95 @@ class Sidebar extends Component implements HasForms
 {
     use InteractsWithForms;
 
-    public ?array $allData = null; // all applications
+    public ?array $allData = null;
     public ?int $appId = null;
+    public ?string $appName = null;
     protected ?string $token = null;
     public ?array $formData = [];
 
     public function mount(): void
     {
         $this->token = session('cubewiki_token');
-        // Prefer query param first, then session value
-        $requestedAppId = (int) request()->integer('app');
-        $sessionAppId = (int) (session('cubewiki_application_id') ?? 0);
-        $initialAppId = $requestedAppId ?: $sessionAppId;
 
-        if (! $this->token) return;
+        if (! $this->token) {
+            return;
+        }
 
-        $service = app(WikiCubeApiService::class);
+        $service       = app(WikiCubeApiService::class);
         $this->allData = $service->fetchKnowledgeBase($this->token, null);
-        $this->appId = $initialAppId ?: ($this->getFirstAppId() ?? null);
-        $this->form->fill(['appId' => $this->appId]);
+
+        // URL: ?app=naam
+        $appParam        = request()->query('app');
+        $sessionAppName  = session('cubewiki_application_name');
+        $resolvedAppName = null;
+
+        if (! empty($appParam) && $this->appNameExists($appParam)) {
+            $resolvedAppName = $this->normalizeAppName($appParam);
+        }
+        elseif (! empty($sessionAppName) && $this->appNameExists($sessionAppName)) {
+            $resolvedAppName = $this->normalizeAppName($sessionAppName);
+        }
+        else {
+            $resolvedAppName = $this->getFirstAppName();
+        }
+
+        $this->appName = $resolvedAppName;
+        $this->appId   = $this->appName ? $this->getAppIdByName($this->appName) : null;
+
+        session([
+            'cubewiki_application_name' => $this->appName,
+            'cubewiki_application_id'   => $this->appId,
+        ]);
+
+        if ($this->appName) {
+            $this->form->fill(['appId' => $this->appName]);
+        }
+    }
+    protected function appNameExists(string $name): bool
+    {
+        foreach ($this->allData['applications'] ?? [] as $app) {
+            if (isset($app['name']) && strcasecmp($app['name'], $name) === 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function normalizeAppName(string $name): ?string
+    {
+        foreach ($this->allData['applications'] ?? [] as $app) {
+            if (isset($app['name']) && strcasecmp($app['name'], $name) === 0) {
+                return $app['name']; // originele casing
+            }
+        }
+
+        return null;
+    }
+
+    protected function getAppIdByName(?string $name): ?int
+    {
+        if (! $name) {
+            return null;
+        }
+
+        foreach ($this->allData['applications'] ?? [] as $app) {
+            if (isset($app['name']) && strcasecmp($app['name'], $name) === 0) {
+                return isset($app['id']) ? (int) $app['id'] : null;
+            }
+        }
+
+        return null;
+    }
+    protected function getFirstAppName(): ?string
+    {
+        foreach ($this->allData['applications'] ?? [] as $app) {
+            if (isset($app['name'])) {
+                return $app['name'];
+            }
+        }
+
+        return null;
     }
 
     public function form(Schema $schema): Schema
@@ -44,33 +114,35 @@ class Sidebar extends Component implements HasForms
                 ->live()
                 ->searchable()
                 ->afterStateUpdated(function ($state) {
-                    $this->appId = $state ? (int) $state : null;
-                    session(['cubewiki_application_id' => $this->appId]);
+                    // $state is nu de NAAM van de app
+                    $this->appName = $state ?: null;
+                    $this->appId   = $this->appName ? $this->getAppIdByName($this->appName) : null;
 
-                    // Redirect so navigation rebuilds for selected app
-                    if ($this->appId) {
-                        $this->redirect(url('/cubewiki/knowledge-base?app=' . $this->appId));
+                    session([
+                        'cubewiki_application_name' => $this->appName,
+                        'cubewiki_application_id'   => $this->appId,
+                    ]);
+
+                    if ($this->appName) {
+                        $this->redirect(url('/cubewiki/knowledge-base?app=' . urlencode($this->appName)));
                         return;
                     }
+
                     $this->redirect(url('/cubewiki/knowledge-base'));
                 }),
         ])->statePath('formData');
     }
 
-    protected function getFirstAppId(): ?int
-    {
-        foreach ($this->allData['applications'] ?? [] as $app) {
-            return (int) ($app['id'] ?? 0) ?: null;
-        }
-        return null;
-    }
-
     public function getAppOptions(): array
     {
         $opts = [];
+
         foreach ($this->allData['applications'] ?? [] as $app) {
-            $opts[(int) $app['id']] = $app['name'];
+            if (isset($app['name'])) {
+                $opts[$app['name']] = $app['name'];
+            }
         }
+
         return $opts;
     }
 
