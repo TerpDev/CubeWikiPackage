@@ -1,6 +1,6 @@
 <?php
 
-namespace TerpDev\CubeWikiPackage\Livewire;
+namespace TerpDev\CubeWikiPackage\Actions\Panel\Components;
 
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -14,28 +14,23 @@ use Livewire\Component;
 use TerpDev\CubeWikiPackage\Filament\CubeWikiPlugin;
 use TerpDev\CubeWikiPackage\Services\WikiCubeApiService;
 
-class WikiactionButton extends Component implements HasForms, HasActions
+class HelpAction extends Component implements HasForms, HasActions
 {
     use InteractsWithForms;
     use InteractsWithActions;
-    public string $variant = 'help';
-
-    public ?string $slug = null;
-    public ?string $label = null;
 
     public ?string $title = null;
+
     public ?string $contentHtml = null;
 
     protected function getPages(): array
     {
         return CubeWikiPlugin::getImportantPages();
     }
-
     public function getActions(): array
     {
         return [
             $this->helpAction(),
-            $this->hintAction(),
         ];
     }
 
@@ -50,45 +45,21 @@ class WikiactionButton extends Component implements HasForms, HasActions
                 Placeholder::make('page_content')
                     ->hiddenLabel()
                     ->content(fn () => new HtmlString(
-                        '<div class="prose dark:prose-invert max-w-3xl mx-auto">' .
-                        ($this->contentHtml) .
-                        '</div>'
+                        '<div class="prose dark:prose-invert max-w-3xl mx-auto">'
+                        . ($this->contentHtml ?? '<p class="text-sm text-gray-500">Geen content.</p>')
+                        . '</div>'
                     )),
             ])
             ->modalSubmitAction(false);
     }
-
-    protected static function hintAction(): Action
-    {
-        return Action::make('hint')
-            ->label('Hint')
-            ->icon('heroicon-o-question-mark-circle')
-            ->modal()
-            ->modalHeading(fn () => $this->title ?? ($this->label ?? 'Hint'))
-            ->modalWidth('md')
-            ->form([
-                Placeholder::make('hint_content')
-                    ->hiddenLabel()
-                    ->content(fn () => new HtmlString(
-                        '<div class="prose dark:prose-invert">' .
-                        ($this->contentHtml) .
-                        '</div>'
-                    )),
-            ])
-            ->modalSubmitAction(false);
-    }
-
     protected function resolveApiToken(): ?string
     {
-        $token = session('cubewiki_token');
+        $token = session('cubewiki_token')
+            ?? config('cubewikipackage.token')
+            ?? env('CUBEWIKI_TOKEN');
 
-        if (! $token) {
-            $token = config('cubewikipackage.token')
-                ?? env('CUBEWIKI_TOKEN');
-
-            if ($token) {
-                session(['cubewiki_token' => $token]);
-            }
+        if ($token) {
+            session(['cubewiki_token' => $token]);
         }
 
         return $token ?: null;
@@ -96,19 +67,17 @@ class WikiactionButton extends Component implements HasForms, HasActions
 
     public function openBySlug(string $slug): void
     {
-        if ($this->variant === 'help') {
-            $pluginPages     = CubeWikiPlugin::getImportantPages();
-            $registeredSlugs = array_filter(array_map(fn ($p) => $p['slug'] ?? null, $pluginPages));
+        $pluginPages     = CubeWikiPlugin::getImportantPages();
+        $registeredSlugs = array_filter(array_map(fn ($p) => $p['slug'] ?? null, $pluginPages));
 
-            if (! in_array($slug, $registeredSlugs, true)) {
-                Notification::make()
-                    ->warning()
-                    ->title('Ongeldige pagina')
-                    ->body("De geselecteerde help-pagina [{$slug}] is niet geregistreerd voor deze plugin.")
-                    ->send();
+        if (! in_array($slug, $registeredSlugs, true)) {
+            Notification::make()
+                ->warning()
+                ->title('Ongeldige pagina')
+                ->body("De geselecteerde help-pagina [{$slug}] is niet geregistreerd in CubeWikiPlugin::importantPages().")
+                ->send();
 
-                return;
-            }
+            return;
         }
 
         $token = $this->resolveApiToken();
@@ -124,8 +93,7 @@ class WikiactionButton extends Component implements HasForms, HasActions
         }
 
         $service = app(WikiCubeApiService::class);
-
-        $data = $service->fetchKnowledgeBase($token, null);
+        $data    = $service->fetchKnowledgeBase($token, null);
 
         $found = null;
 
@@ -156,25 +124,12 @@ class WikiactionButton extends Component implements HasForms, HasActions
         $this->contentHtml = $found['content_html']
             ?? ($found['content'] ?? '<p class="text-sm text-gray-500">Geen content beschikbaar.</p>');
 
-        if ($this->variant === 'hint') {
-            $this->mountAction('hint');
-        } else {
-            $this->mountAction('help');
-        }
+        $this->mountAction('help');
     }
 
     public function render()
     {
-        if ($this->variant === 'hint') {
-            return view('cubewikipackage::livewire.hintaction', [
-                'icon'  => 'heroicon-o-question-mark-circle',
-                'label' => $this->label ?? 'Hint',
-                'slug'  => $this->slug,
-            ]);
-        }
-
-        // Help = dropdown in topbar
-        return view('cubewikipackage::livewire.helpaction', [
+        return view('cubewikipackage::panel.helpaction', [
             'icon'  => 'heroicon-o-question-mark-circle',
             'pages' => $this->getPages(),
         ]);

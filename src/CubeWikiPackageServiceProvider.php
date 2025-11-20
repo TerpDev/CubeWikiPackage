@@ -19,6 +19,7 @@ use TerpDev\CubeWikiPackage\Commands\CubeWikiPackageCommand;
 use TerpDev\CubeWikiPackage\Filament\Pages\Sidebar;
 use TerpDev\CubeWikiPackage\Livewire\DocumentationButton;
 use TerpDev\CubeWikiPackage\Livewire\WikiactionButton;
+use TerpDev\CubeWikiPackage\Actions\Panel\Components\HelpAction as PanelHelpAction;
 
 class CubeWikiPackageServiceProvider extends PackageServiceProvider
 {
@@ -64,8 +65,7 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         // Livewire components
-        Livewire::component('cubewikipackage-helpaction', WikiactionButton::class);
-        Livewire::component('cubewikipackage-hintaction', WikiactionButton::class);
+        Livewire::component('cubewikipackage-helpaction', PanelHelpAction::class);
         Livewire::component('cubewikipackage-documentation-button', DocumentationButton::class);
         Livewire::component('cubewiki-sidebar', Sidebar::class);
 
