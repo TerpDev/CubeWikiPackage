@@ -3,7 +3,7 @@
         <x-slot name="trigger">
             <button
                 type="button"
-                class="{{ $buttonClass ?? 'flex items-center gap-x-2 px-3 py-1.5 text-sm border border-gray-500 rounded-lg hover:border-gray-400 duration-300 text-black dark:text-white' }}"
+                class="flex items-center gap-2 px-3 py-2 text-sm border border-gray-500 rounded-lg hover:border-gray-400 duration-300 text-black dark:text-white"
             >
                 <x-filament::icon :icon="$icon" class="h-6 w-6 text-current" />
                 <span class="flex-1">Help</span>
@@ -24,5 +24,7 @@
             @endforelse
         </x-filament::dropdown.list>
     </x-filament::dropdown>
+
+    {{-- Modals voor Filament actions --}}
     <x-filament-actions::modals />
 </div>

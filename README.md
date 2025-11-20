@@ -1,50 +1,31 @@
-# WikiCube Knowledge Base for Filament
+# WikiCube Knowledge Base for Filament (Nederlandstalig)
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/terpdev/cubewikipackage.svg?style=flat-square)](https://packagist.org/packages/terpdev/cubewikipackage)
-[![Total Downloads](https://img.shields.io/packagist/dt/terpdev/cubewikipackage.svg?style=flat-square)](https://packagist.org/packages/terpdev/cubewikipackage)
+Een gebruiksvriendelijke Filament-plugin waarmee je je WikiCube-kennisbank direct in het Filament-adminpanel toont. Je kunt meerdere tenants verbinden via API-tokens en de kennisbank bekijken met een georganiseerde, toegankelijke interface.
 
-A beautiful Filament plugin to display your WikiCube knowledge base content directly in your admin panel. Users can connect to different tenants using API tokens and browse their knowledge base with a clean, organized interface.
+Belangrijkste features
 
-## Showcase
-//coming
-## Requirements
+- Koppel met één of meerdere WikiCube-tenant(s) via API-token.
+- Toon applicaties, categorieën en pagina's overzichtelijk in Filament.
+- Integratie met Filament-panels en -schemas (hint/important pages etc.).
+- Caching en refresh-functionaliteit.
+
+Vereisten
 
 - PHP 8.1+
 - Laravel 11.28+
-- Filament v4.0+
+- Filament v4+
 
-## Introdocution
+Installatie
 
-This package allows you to integrate your WikiCube knowledge base directly into your Filament admin panel.
-
-## Installation
-
-Install the package via composer:
+Voeg het pakket toe met Composer:
 
 ```bash
 composer require terpdev/cubewikipackage
 ```
 
-## Configuration
+Registratie (optioneel)
 
-Add your WikiCube API settings to your `.env` file ():
-
-```env
-WIKICUBE_API_URL=https://wikicube.test
-WIKICUBE_API_TOKEN=your-api-token-here
-WIKICUBE_APPLICATION_NAME=your-application-name
-//application name is for default application you see when 
-clicked the documentation button
-```
-
-## Usage
-When you have installed the package, you will see a documentation button on the 
-bottom of your sidebar which will lead you to the knowledge base panel where you can see
-your content.
-
-### Registration (Advanced)
-
-If you want more control, you can manually register the plugin in your `AdminPanelProvider`:
+Standaard wordt het pakket automatisch geregistreerd als je het via Composer installeert en gebruikt binnen een Filament-panel. Als je handmatig wilt registreren (bijvoorbeeld in je eigen `AdminPanelProvider`), doe je dat zo:
 
 ```php
 use TerpDev\CubeWikiPackage\Filament\CubeWikiPlugin;
@@ -61,19 +42,52 @@ public function panel(Panel $panel): Panel
 }
 ```
 
-### Plugin Options
+Configuratie
+
+Publiceer en controleer de config (optioneel):
+
+```bash
+php artisan vendor:publish --tag=cubewikipackage-config
+```
+
+Voeg de volgende variabelen toe aan je `.env` (of controleer ze in `config/cubewikipackage.php`):
+
+```env
+WIKICUBE_API_URL=https://wikicube.example
+WIKICUBE_API_TOKEN=je-api-token
+WIKICUBE_APPLICATION_NAME=je-standaard-applicatie
+```
+
+Uitleg van instellingen
+
+- `WIKICUBE_API_URL`: De basis-URL van de WikiCube API van je tenant.
+- `WIKICUBE_API_TOKEN`: API-token om de knowledge base te lezen. Kan ook via UI ingevoerd worden als je dat zo wilt bouwen.
+- `WIKICUBE_APPLICATION_NAME`: Naam van de standaard applicatie die getoond wordt.
+
+Gebruik
+
+- In je Filament panel zie je een Documentation/Help-knop (meestal onderin de sidebar) die naar de knowledge base leidt.
+- Binnen de knowledge base kun je applicaties kiezen en vervolgens categorieën en pagina's doorbladeren.
+- Er is een refresh-knop om cache te legen en gegevens opnieuw van de API te laden.
+
+Plugin-opties (voorbeeld)
+
+Je kunt de plugin configureren met belangrijke/adviezen pagina's zodat deze als shortcuts of hints beschikbaar zijn:
 
 ```php
 CubeWikiPlugin::make()
-    ->importantPages([ 
+    ->importantPages([
        ['slug' => 'your-slug-name', 'title' => 'Custom Title']
-    ]) // important pages in the help button in the top
-    ->hintPages([ 
+    ])
+    ->hintPages([
        ['slug' => 'your-slug-name', 'title' => 'Custom Title']
-    ]) // hint pages as a hint for your schema form components
+    ])
 ```
 
-### Hint action example
+Hints in Filament Form Components
+
+Voorbeeld: een `TextInput` dat een hint toont via een Livewire-component van dit pakket:
+
 ```php
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Blade;
@@ -102,97 +116,41 @@ return $schema
     ]);
 ```
 
+Troubleshooting
 
-## How It Works
+- "Geen data zichtbaar": controleer `WIKICUBE_API_URL` en `WIKICUBE_API_TOKEN`.
+- "Sticky sidebar werkt niet": dit is meestal CSS/JS-gerelateerd. De plugin levert standaard structuur; als je custom theme of Tailwind-config hebt, controleer dan of `.sticky`-class en position: sticky toegestaan zijn binnen de container en dat er geen overflow: hidden is op een ouder-element.
+- "Breadcrumbs te vaak zichtbaar": als je breadcrumbs alleen wilt tonen op paginapagina's (niet op index/list views), verplaats de rendering van breadcrumbs naar de specifieke page-view of guard ermee via een conditie (bijv. alleen renderen als er een huidige pagina-slug aanwezig is).
 
-1. **Install the package** - User has to use the plugin in their panel to work
-2. **Enter API token** - Enter your api-token in the .env file from your tenant
-3. **View knowledge base** - Click on the documentation button at the bottom of the sidebar to view the knowledge base
-4. **Switch applications** - Click on the top of the sidebar at the application name to switch between different applications
-5. **Refresh data** - Use the refresh button to clear cache and reload
+Ontwikkeling & testen
 
-## Screenshots
+- Run unit tests / pest: `composer test`
+- Run phpunit: `./vendor/bin/phpunit`
 
-### Token Input
-Users enter their WikiCube API token to connect to a tenant.
+Code stijl en linting
 
-### Knowledge Base View
-Beautiful, organized display of applications, categories, and pages with expandable content.
+Volg de repository-conventies; gebruik PHP CS Fixer / Rector indien geconfigureerd in het project.
 
-## Configuration File
+Contributie
 
-The published config file `config/cubewikipackage.php`:
+1. Fork de repo
+2. Maak een feature-branch
+3. Maak je wijzigingen en tests
+4. Open een pull request
 
-```php
-return [
-    /*
-    | WikiCube API URL
-    */
-    'api_url' => env('WIKICUBE_API_URL', 'https://wikicube.test'),
+License
 
-    /*
-    | API Token (optional - users can enter via UI)
-    */
-    'api_token' => env('WIKICUBE_API_TOKEN'),
+Dit project valt onder de MIT-licentie. Zie `LICENSE.md` voor details.
 
-    /*
-    | Cache duration in minutes
-    */
-    'cache_duration' => env('WIKICUBE_CACHE_DURATION', 5),
-];
-```
+Contact
 
-## Testing
+Voor vragen of issues, open een GitHub issue in de originele repository of neem contact op via de repository-eigenaar.
 
-```bash
-composer test
-```
+---
 
-## Changelog
+Als je wilt, kan ik ook specifiek een korte sectie toevoegen met:
+- Markdown-voorbeeld voor `env`-bestand
+- Snelle debugging-checklist voor sticky/breadcrumb-problemen (met concrete CSS/JS fixes)
+- Voorstellen voor unit tests rond de View-logic (bijv. breadcrumbs alleen tonen wanneer een pagina is geselecteerd)
 
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
-
-## Contributing
-
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
-
-## Security Vulnerabilities
-
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
-
-## Credits
-
-- [TerpDev](https://github.com/terpdev)
-- [All Contributors](../../contributors)
-
-## License
-
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
-
-## Testing
-
-```bash
-composer test
-```
-
-## Changelog
-
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
-
-## Contributing
-
-Please see [CONTRIBUTING](.github/CONTRIBUTING.md) for details.
-
-## Security Vulnerabilities
-
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
-
-## Credits
-
-- [terpdev](https://github.com/TerpDev)
-- [All Contributors](../../contributors)
-
-## License
-
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
-
+Laat weten welke van die extra's je wil, dan voeg ik ze direct toe.
