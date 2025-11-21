@@ -14,25 +14,28 @@ use Livewire\Component;
 use TerpDev\CubeWikiPackage\Filament\CubeWikiPlugin;
 use TerpDev\CubeWikiPackage\Services\WikiCubeApiService;
 
-class HelpAction extends Component implements HasForms, HasActions
+class HelpAction extends Component implements HasActions, HasForms
 {
-    use InteractsWithForms;
     use InteractsWithActions;
+    use InteractsWithForms;
 
     public ?string $title = null;
+
     public ?string $contentHtml = null;
+
     protected ?array $knowledgeBaseData = null;
+
     protected function getPages(): array
     {
         $rawPages = CubeWikiPlugin::getImportantPages();
-        $data     = $this->getKnowledgeBaseData();
+        $data = $this->getKnowledgeBaseData();
 
         $result = [];
 
         foreach ($rawPages as $item) {
             // 1) Alleen slug opgegeven: 'introduction'
             if (is_string($item)) {
-                $slug  = $item;
+                $slug = $item;
                 $title = $this->resolveTitleFromData($data, $slug) ?? $slug;
             }
             // 2) Array met slug en optioneel title
@@ -53,7 +56,7 @@ class HelpAction extends Component implements HasForms, HasActions
             }
 
             $result[] = [
-                'slug'  => $slug,
+                'slug' => $slug,
                 'title' => $title,
             ];
         }
@@ -80,8 +83,8 @@ class HelpAction extends Component implements HasForms, HasActions
                     ->hiddenLabel()
                     ->content(fn () => new HtmlString(
                         '<div class="prose dark:prose-invert max-w-3xl mx-auto">'
-                        . ($this->contentHtml)
-                        . '</div>'
+                        .($this->contentHtml)
+                        .'</div>'
                     )),
             ])
             ->modalSubmitAction(false);
@@ -107,8 +110,7 @@ class HelpAction extends Component implements HasForms, HasActions
     protected function resolveApiToken(): ?string
     {
         $token = session('cubewiki_token')
-            ?? config('cubewikipackage.token')
-            ?? env('CUBEWIKI_TOKEN');
+            ?? config('cubewikipackage.api_token');
 
         if ($token) {
             session(['cubewiki_token' => $token]);
@@ -149,6 +151,7 @@ class HelpAction extends Component implements HasForms, HasActions
 
         $this->mountAction('help');
     }
+
     protected function resolveTitleFromData(?array $data, string $slug): ?string
     {
         if (! $data) {
@@ -180,7 +183,7 @@ class HelpAction extends Component implements HasForms, HasActions
     public function render()
     {
         return view('cubewikipackage::panel.helpaction', [
-            'icon'  => 'heroicon-o-question-mark-circle',
+            'icon' => 'heroicon-o-question-mark-circle',
             'pages' => $this->getPages(),
         ]);
     }

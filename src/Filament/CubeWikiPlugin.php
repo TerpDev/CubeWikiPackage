@@ -12,8 +12,11 @@ use Illuminate\Support\Facades\Blade;
 class CubeWikiPlugin implements Plugin
 {
     public static string $cubeWikiPanelPath = 'cubewiki';
+
     public static string $buttonLabel = 'Documentation';
+
     public static string $buttonIcon = 'heroicon-o-book-open';
+
     public static array $importantPages = [];
 
     public function getId(): string
@@ -24,6 +27,7 @@ class CubeWikiPlugin implements Plugin
     public function importantPages(array $pages): static
     {
         self::$importantPages = $pages;
+
         return $this;
     }
 
@@ -41,6 +45,7 @@ class CubeWikiPlugin implements Plugin
                 if ($currentPanel?->getId() === self::$cubeWikiPanelPath) {
                     return '';
                 }
+
                 return Blade::render('<livewire:cubewikipackage-helpaction />');
             }
         );
@@ -51,8 +56,8 @@ class CubeWikiPlugin implements Plugin
         //
     }
 
-    public static function make(): static
+    public static function make(): self
     {
-        return new static();
+        return new self;
     }
 }

@@ -10,10 +10,10 @@ use Filament\Forms\Contracts\HasForms;
 use Livewire\Component;
 use TerpDev\CubeWikiPackage\Filament\CubeWikiPlugin;
 
-class DocumentationButton extends Component implements HasForms, HasActions
+class DocumentationButton extends Component implements HasActions, HasForms
 {
-    use InteractsWithForms;
     use InteractsWithActions;
+    use InteractsWithForms;
 
     public function createAction(): Action
     {
@@ -21,9 +21,9 @@ class DocumentationButton extends Component implements HasForms, HasActions
             ->label(CubeWikiPlugin::$buttonLabel)
             ->icon(CubeWikiPlugin::$buttonIcon)
             ->action(function () {
-                $token = env('WIKICUBE_API_TOKEN') ?: config('cubewikipackage.token');
+                $token = config('cubewikipackage.api_token');
 
-                $applicationName = env('WIKICUBE_APPLICATION_NAME')  ?: config('cubewikipackage.application_name');
+                $applicationName = config('cubewikipackage.default_application');
 
                 if ($token) {
                     session(['cubewiki_token' => $token]);
@@ -33,9 +33,9 @@ class DocumentationButton extends Component implements HasForms, HasActions
                     session(['cubewiki_application_name' => $applicationName]);
                 }
 
-                $url = '/' . CubeWikiPlugin::$cubeWikiPanelPath . '/knowledge-base';
+                $url = '/'.CubeWikiPlugin::$cubeWikiPanelPath.'/knowledge-base';
                 if (! empty($applicationName)) {
-                    $url .= '?app=' . urlencode((string) $applicationName);
+                    $url .= '?app='.urlencode((string) $applicationName);
                 }
 
                 return redirect()->to($url);
@@ -45,7 +45,7 @@ class DocumentationButton extends Component implements HasForms, HasActions
     public function render()
     {
         return view('cubewikipackage::livewire.documentation-button', [
-            'url' => '/' . CubeWikiPlugin::$cubeWikiPanelPath,
+            'url' => '/'.CubeWikiPlugin::$cubeWikiPanelPath,
             'label' => CubeWikiPlugin::$buttonLabel,
             'icon' => CubeWikiPlugin::$buttonIcon,
         ]);

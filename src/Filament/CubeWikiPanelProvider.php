@@ -32,10 +32,10 @@ class CubeWikiPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->discoverResources(in: __DIR__ . '/Resources', for: 'TerpDev\\CubeWikiPackage\\Filament\\Resources')
-            ->discoverPages(in: __DIR__ . '/Pages', for: 'TerpDev\\CubeWikiPackage\\Filament\\Pages')
+            ->discoverResources(in: __DIR__.'/Resources', for: 'TerpDev\\CubeWikiPackage\\Filament\\Resources')
+            ->discoverPages(in: __DIR__.'/Pages', for: 'TerpDev\\CubeWikiPackage\\Filament\\Pages')
             ->pages([])
-            ->discoverWidgets(in: __DIR__ . '/Widgets', for: 'TerpDev\\CubeWikiPackage\\Filament\\Widgets')
+            ->discoverWidgets(in: __DIR__.'/Widgets', for: 'TerpDev\\CubeWikiPackage\\Filament\\Widgets')
             ->widgets([])
             ->middleware([
                 EncryptCookies::class,
@@ -50,11 +50,11 @@ class CubeWikiPanelProvider extends PanelProvider
             ])
             ->renderHook(
                 PanelsRenderHook::SIDEBAR_NAV_START,
-                fn(): string => Blade::render('<livewire:cubewiki-sidebar />')
+                fn (): string => Blade::render('<livewire:cubewiki-sidebar />')
             )
             ->navigation(function (NavigationBuilder $builder): NavigationBuilder {
                 $token = session('cubewiki_token');
-                $selectedAppId = request()->integer('app') ?: (int)session('cubewiki_application_id');
+                $selectedAppId = request()->integer('app') ?: (int) session('cubewiki_application_id');
 
                 $categoryItems = [];
 
@@ -72,8 +72,8 @@ class CubeWikiPanelProvider extends PanelProvider
                             foreach (($category['pages'] ?? []) as $page) {
                                 $pageChildren[] = NavigationItem::make($page['title'] ?? 'Page')
                                     ->icon('heroicon-o-document-text')
-                                    ->url(url('/cubewiki/knowledge-base?app=' . $selectedAppId . '&cat=' . ($category['id'] ?? '') . '&page=' . ($page['id'] ?? '')))
-                                    ->isActiveWhen(fn(): bool => (int)request()->query('page') === (int)($page['id'] ?? 0));
+                                    ->url(url('/cubewiki/knowledge-base?app='.$selectedAppId.'&cat='.($category['id'] ?? '').'&page='.($page['id'] ?? '')))
+                                    ->isActiveWhen(fn (): bool => (int) request()->query('page') === (int) ($page['id'] ?? 0));
                             }
 
                             if (empty($pageChildren)) {
@@ -84,8 +84,8 @@ class CubeWikiPanelProvider extends PanelProvider
 
                             $categoryItem = NavigationItem::make($category['name'] ?? 'Category')
                                 ->icon('heroicon-o-folder')
-                                ->url(url('/cubewiki/knowledge-base?app=' . $selectedAppId . '&cat=' . ($category['id'] ?? '')))
-                                ->isActiveWhen(fn(): bool => (int)request()->query('cat') === (int)($category['id'] ?? 0))
+                                ->url(url('/cubewiki/knowledge-base?app='.$selectedAppId.'&cat='.($category['id'] ?? '')))
+                                ->isActiveWhen(fn (): bool => (int) request()->query('cat') === (int) ($category['id'] ?? 0))
                                 ->childItems($pageChildren);
                             $categoryItems[] = $categoryItem;
                         }

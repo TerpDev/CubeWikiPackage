@@ -15,24 +15,25 @@ use Livewire\Livewire;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
+use TerpDev\CubeWikiPackage\Actions\Panel\Components\HelpAction as PanelHelpAction;
 use TerpDev\CubeWikiPackage\Commands\CubeWikiPackageCommand;
 use TerpDev\CubeWikiPackage\Filament\CubeWikiPanelProvider;
 use TerpDev\CubeWikiPackage\Filament\Pages\Sidebar;
 use TerpDev\CubeWikiPackage\Livewire\DocumentationButton;
-use TerpDev\CubeWikiPackage\Livewire\WikiactionButton;
-use TerpDev\CubeWikiPackage\Actions\Panel\Components\HelpAction as PanelHelpAction;
 
 class CubeWikiPackageServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'cubewikipackage';
+
     public static string $cubeWikiPanelPath = 'cubewiki';
+
     public static string $viewNamespace = 'cubewikipackage';
 
     public function configurePackage(Package $package): void
     {
         $package->name(static::$name)
             ->hasCommands($this->getCommands())
-            ->hasInstallCommand(function (InstallCommand $command) {
+            ->hasInstallCommand(function (InstallCommand $command): void {
                 $command
                     ->publishConfigFile()
                     ->askToStarRepoOnGitHub('terpdev/cubewikipackage');
@@ -102,8 +103,7 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
         $token = session('cubewiki_token');
 
         if (! $token) {
-            $token = config('cubewikipackage.token')
-                ?? env('CUBEWIKI_TOKEN');
+            $token = config('cubewikipackage.api_token');
 
             if ($token) {
                 session(['cubewiki_token' => $token]);
@@ -111,8 +111,7 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
         }
         $appName = session('cubewiki_application_name');
         if (! $appName) {
-            $appName = config('cubewikipackage.default_application')
-                ?? env('CUBEWIKI_APPLICATION');
+            $appName = config('cubewikipackage.default_application');
 
             if ($appName) {
                 session(['cubewiki_application_name' => $appName]);
@@ -131,8 +130,8 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
     protected function getAssets(): array
     {
         return [
-            Css::make('cubewikipackage-styles', __DIR__ . '/../resources/dist/cubewikipackage.css'),
-            Js::make('cubewikipackage-scripts', __DIR__ . '/../resources/dist/cubewikipackage.js'),
+            Css::make('cubewikipackage-styles', __DIR__.'/../resources/dist/cubewikipackage.css'),
+            Js::make('cubewikipackage-scripts', __DIR__.'/../resources/dist/cubewikipackage.js'),
         ];
     }
 

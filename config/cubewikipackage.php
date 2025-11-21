@@ -31,4 +31,3 @@ return [
     */
     'cache_duration' => env('WIKICUBE_CACHE_DURATION', 5),
 ];
-

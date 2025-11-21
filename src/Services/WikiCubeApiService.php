@@ -2,8 +2,8 @@
 
 namespace TerpDev\CubeWikiPackage\Services;
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 
 class WikiCubeApiService
 {
@@ -33,14 +33,14 @@ class WikiCubeApiService
                 if ($response->successful()) {
                     $data = $response->json();
 
-                    if (!isset($data['success']) || !$data['success']) {
+                    if (! isset($data['success']) || ! $data['success']) {
                         throw new \Exception($data['message'] ?? 'Invalid token or no data found');
                     }
 
                     return $data;
                 }
 
-                throw new \Exception('Failed to fetch knowledge base data. Status: ' . $response->status());
+                throw new \Exception('Failed to fetch knowledge base data. Status: '.$response->status());
             }
         );
     }

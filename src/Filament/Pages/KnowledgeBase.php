@@ -8,9 +8,9 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
 use TerpDev\CubeWikiPackage\Services\WikiCubeApiService;
 
 class KnowledgeBase extends Page implements HasForms
@@ -22,18 +22,23 @@ class KnowledgeBase extends Page implements HasForms
     public ?string $selectedPageContentHtml = null;
 
     public ?array $knowledgeBaseData = null;
+
     public ?string $apiToken = null;
 
     public ?int $selectedApplicationId = null;
+
     public ?int $selectedCategoryId = null;
+
     public ?int $selectedPageId = null;
+
     public ?string $selectedPageTitle = null;
+
     public array $pageHeadings = [];
 
     public function mount(): void
     {
-        $sessionToken   = session('cubewiki_token');
-        $sessionAppId   = session('cubewiki_application_id');
+        $sessionToken = session('cubewiki_token');
+        $sessionAppId = session('cubewiki_application_id');
         $sessionAppName = session('cubewiki_application_name');
 
         if (! $sessionToken) {
@@ -53,8 +58,8 @@ class KnowledgeBase extends Page implements HasForms
 
         // URL-parameters
         $appParam = request()->query('app');           // naam of id
-        $qCat     = (int) request()->query('cat', 0);  // categorie-id
-        $qPage    = (int) request()->query('page', 0); // page-id
+        $qCat = (int) request()->query('cat', 0);  // categorie-id
+        $qPage = (int) request()->query('page', 0); // page-id
 
         $resolvedAppId = null;
 
@@ -103,7 +108,7 @@ class KnowledgeBase extends Page implements HasForms
                         ->columnSpan(['md' => 3, 'lg' => 3])
                         ->content(fn () => new HtmlString(
                             '<div class="prose dark:prose-invert pt-4">'
-                            . $this->selectedPageContentHtml .
+                            .$this->selectedPageContentHtml.
                             '</div>'
                         )),
 
@@ -144,24 +149,24 @@ class KnowledgeBase extends Page implements HasForms
 
     public function selectApplication(?int $appId): void
     {
-        $this->selectedApplicationId   = $appId ?: null;
-        $this->selectedCategoryId      = null;
-        $this->selectedPageId          = null;
-        $this->selectedPageTitle       = null;
+        $this->selectedApplicationId = $appId ?: null;
+        $this->selectedCategoryId = null;
+        $this->selectedPageId = null;
+        $this->selectedPageTitle = null;
         $this->selectedPageContentHtml = null;
-        $this->pageHeadings            = [];
+        $this->pageHeadings = [];
 
         // Sessie ook bijwerken (handig i.c.m. Sidebar / opnieuw openen)
         if ($this->selectedApplicationId) {
             $app = $this->getApplicationById($this->selectedApplicationId);
 
             session([
-                'cubewiki_application_id'   => $this->selectedApplicationId,
+                'cubewiki_application_id' => $this->selectedApplicationId,
                 'cubewiki_application_name' => $app['name'] ?? null,
             ]);
         } else {
             session([
-                'cubewiki_application_id'   => null,
+                'cubewiki_application_id' => null,
                 'cubewiki_application_name' => null,
             ]);
         }
@@ -169,11 +174,11 @@ class KnowledgeBase extends Page implements HasForms
 
     public function selectCategory(?int $categoryId): void
     {
-        $this->selectedCategoryId      = $categoryId ?: null;
-        $this->selectedPageId          = null;
-        $this->selectedPageTitle       = null;
+        $this->selectedCategoryId = $categoryId ?: null;
+        $this->selectedPageId = null;
+        $this->selectedPageTitle = null;
         $this->selectedPageContentHtml = null;
-        $this->pageHeadings            = [];
+        $this->pageHeadings = [];
     }
 
     public function openPage(int $pageId): void
@@ -205,8 +210,8 @@ class KnowledgeBase extends Page implements HasForms
             return;
         }
 
-        $dom = new \DOMDocument();
-        @$dom->loadHTML('<?xml encoding="utf-8"?>' . $this->selectedPageContentHtml);
+        $dom = new \DOMDocument;
+        @$dom->loadHTML('<?xml encoding="utf-8"?>'.$this->selectedPageContentHtml);
 
         $xpath = new \DOMXPath($dom);
         $nodes = $xpath->query('//h1 | //h2 | //h3 | //h4 | //h5 | //h6');
@@ -219,20 +224,26 @@ class KnowledgeBase extends Page implements HasForms
             }
 
             $level = (int) substr($node->nodeName, 1);
-            $id    = $node->getAttribute('id') ?: Str::slug($text);
 
-            if (! $node->hasAttribute('id')) {
-                $node->setAttribute('id', $id);
+            // Work with DOMElement only for attribute operations
+            if ($node instanceof \DOMElement) {
+                $id = $node->getAttribute('id') ?: Str::slug($text);
+
+                if (! $node->hasAttribute('id')) {
+                    $node->setAttribute('id', $id);
+                }
+
+                $existingClass = $node->getAttribute('class');
+                $newClass = trim($existingClass.' scroll-mt-24');
+                $node->setAttribute('class', $newClass);
+            } else {
+                $id = Str::slug($text);
             }
 
-            $existingClass = $node->getAttribute('class') ?? '';
-            $newClass      = trim($existingClass . ' scroll-mt-24');
-            $node->setAttribute('class', $newClass);
-
             $this->pageHeadings[] = [
-                'text'  => $text,
+                'text' => $text,
                 'level' => $level,
-                'id'    => $id,
+                'id' => $id,
             ];
         }
 
@@ -254,7 +265,7 @@ class KnowledgeBase extends Page implements HasForms
             return '';
         }
 
-        $html  = '<div class="py-2 text-sm space-y-2">';
+        $html = '<div class="py-2 text-sm space-y-2">';
         $html .= '  <div class="flex flex-col gap-1.5">';
 
         foreach ($this->pageHeadings as $heading) {
@@ -369,7 +380,7 @@ class KnowledgeBase extends Page implements HasForms
         }
 
         if ($this->selectedCategoryId && ($category = $this->getSelectedCategory())) {
-            $app     = $this->getSelectedApplication();
+            $app = $this->getSelectedApplication();
             $appName = $app['name'] ?? 'Applicatie';
 
             $breadcrumbs[static::getUrl([
