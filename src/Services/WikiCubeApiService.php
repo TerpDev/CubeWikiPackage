@@ -2,8 +2,8 @@
 
 namespace TerpDev\CubeWikiPackage\Services;
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 
 class WikiCubeApiService
 {
@@ -40,7 +40,7 @@ class WikiCubeApiService
                     return $data;
                 }
 
-                throw new \Exception('Failed to fetch knowledge base data. Status: ' . $response->status());
+                throw new \Exception('Failed to fetch knowledge base data. Status: '.$response->status());
             }
         );
     }
