@@ -33,7 +33,7 @@ class WikiCubeApiService
                 if ($response->successful()) {
                     $data = $response->json();
 
-                    if (! isset($data['success']) || ! $data['success']) {
+                    if (!isset($data['success']) || !$data['success']) {
                         throw new \Exception($data['message'] ?? 'Invalid token or no data found');
                     }
 

@@ -16,6 +16,7 @@ use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use TerpDev\CubeWikiPackage\Commands\CubeWikiPackageCommand;
+use TerpDev\CubeWikiPackage\Filament\CubeWikiPanelProvider;
 use TerpDev\CubeWikiPackage\Filament\Pages\Sidebar;
 use TerpDev\CubeWikiPackage\Livewire\DocumentationButton;
 use TerpDev\CubeWikiPackage\Livewire\WikiactionButton;
@@ -36,9 +37,7 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
                     ->publishConfigFile()
                     ->askToStarRepoOnGitHub('terpdev/cubewikipackage');
             });
-
         $configFileName = $package->shortName();
-
         if (file_exists($package->basePath("/../config/{$configFileName}.php"))) {
             $package->hasConfigFile();
         }
@@ -58,21 +57,17 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        // Registreer het CubeWiki Filament Panel
-        $this->app->register(\TerpDev\CubeWikiPackage\Filament\CubeWikiPanelProvider::class);
+        $this->app->register(CubeWikiPanelProvider::class);
     }
 
     public function packageBooted(): void
     {
-        // Livewire components
         Livewire::component('cubewikipackage-helpaction', PanelHelpAction::class);
         Livewire::component('cubewikipackage-documentation-button', DocumentationButton::class);
         Livewire::component('cubewiki-sidebar', Sidebar::class);
 
-        // Zorg dat token / default app direct in de sessie staan
         $this->ensureCubeWikiSessionDefaults();
 
-        // Asset Registration
         FilamentAsset::register(
             $this->getAssets(),
             $this->getAssetPackageName()
@@ -90,13 +85,11 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
                 return Blade::render('<livewire:cubewikipackage-documentation-button />');
             }
         );
-
         FilamentAsset::registerScriptData(
             $this->getScriptData(),
             $this->getAssetPackageName()
         );
 
-        // Icons
         FilamentIcon::register($this->getIcons());
     }
 
@@ -106,7 +99,6 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
             return;
         }
 
-        // Token uit sessie of config / .env
         $token = session('cubewiki_token');
 
         if (! $token) {
@@ -117,10 +109,7 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
                 session(['cubewiki_token' => $token]);
             }
         }
-
-        // Optioneel: default applicatie-naam uit config / .env
         $appName = session('cubewiki_application_name');
-
         if (! $appName) {
             $appName = config('cubewikipackage.default_application')
                 ?? env('CUBEWIKI_APPLICATION');

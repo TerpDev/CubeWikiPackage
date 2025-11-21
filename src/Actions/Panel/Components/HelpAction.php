@@ -20,13 +20,47 @@ class HelpAction extends Component implements HasForms, HasActions
     use InteractsWithActions;
 
     public ?string $title = null;
-
     public ?string $contentHtml = null;
-
+    protected ?array $knowledgeBaseData = null;
     protected function getPages(): array
     {
-        return CubeWikiPlugin::getImportantPages();
+        $rawPages = CubeWikiPlugin::getImportantPages();
+        $data     = $this->getKnowledgeBaseData();
+
+        $result = [];
+
+        foreach ($rawPages as $item) {
+            // 1) Alleen slug opgegeven: 'introduction'
+            if (is_string($item)) {
+                $slug  = $item;
+                $title = $this->resolveTitleFromData($data, $slug) ?? $slug;
+            }
+            // 2) Array met slug en optioneel title
+            elseif (is_array($item)) {
+                $slug = $item['slug'] ?? null;
+
+                if (! $slug) {
+                    continue;
+                }
+
+                // Als dev zelf een title zet, die gebruiken.
+                // Anders uit de API proberen te halen.
+                $title = $item['title']
+                    ?? $this->resolveTitleFromData($data, $slug)
+                    ?? $slug;
+            } else {
+                continue;
+            }
+
+            $result[] = [
+                'slug'  => $slug,
+                'title' => $title,
+            ];
+        }
+
+        return $result;
     }
+
     public function getActions(): array
     {
         return [
@@ -46,12 +80,30 @@ class HelpAction extends Component implements HasForms, HasActions
                     ->hiddenLabel()
                     ->content(fn () => new HtmlString(
                         '<div class="prose dark:prose-invert max-w-3xl mx-auto">'
-                        . ($this->contentHtml ?? '<p class="text-sm text-gray-500">Geen content.</p>')
+                        . ($this->contentHtml)
                         . '</div>'
                     )),
             ])
             ->modalSubmitAction(false);
     }
+
+    protected function getKnowledgeBaseData(): ?array
+    {
+        if ($this->knowledgeBaseData !== null) {
+            return $this->knowledgeBaseData;
+        }
+
+        $token = $this->resolveApiToken();
+
+        if (! $token) {
+            return $this->knowledgeBaseData = null;
+        }
+
+        $service = app(WikiCubeApiService::class);
+
+        return $this->knowledgeBaseData = $service->fetchKnowledgeBase($token, null);
+    }
+
     protected function resolveApiToken(): ?string
     {
         $token = session('cubewiki_token')
@@ -67,22 +119,9 @@ class HelpAction extends Component implements HasForms, HasActions
 
     public function openBySlug(string $slug): void
     {
-        $pluginPages     = CubeWikiPlugin::getImportantPages();
-        $registeredSlugs = array_filter(array_map(fn ($p) => $p['slug'] ?? null, $pluginPages));
+        $data = $this->getKnowledgeBaseData();
 
-        if (! in_array($slug, $registeredSlugs, true)) {
-            Notification::make()
-                ->warning()
-                ->title('Ongeldige pagina')
-                ->body("De geselecteerde help-pagina [{$slug}] is niet geregistreerd in CubeWikiPlugin::importantPages().")
-                ->send();
-
-            return;
-        }
-
-        $token = $this->resolveApiToken();
-
-        if (! $token) {
+        if (! $data) {
             Notification::make()
                 ->warning()
                 ->title('Geen API-token')
@@ -92,23 +131,7 @@ class HelpAction extends Component implements HasForms, HasActions
             return;
         }
 
-        $service = app(WikiCubeApiService::class);
-        $data    = $service->fetchKnowledgeBase($token, null);
-
-        $found = null;
-
-        foreach ($data['applications'] ?? [] as $app) {
-            foreach ($app['categories'] ?? [] as $cat) {
-                foreach ($cat['pages'] ?? [] as $page) {
-                    $pageSlug = $page['slug'] ?? $page['permalink'] ?? null;
-
-                    if (! empty($pageSlug) && $pageSlug === $slug) {
-                        $found = $page;
-                        break 3;
-                    }
-                }
-            }
-        }
+        $found = $this->findPageBySlug($data, $slug);
 
         if (! $found) {
             Notification::make()
@@ -125,6 +148,33 @@ class HelpAction extends Component implements HasForms, HasActions
             ?? ($found['content'] ?? '<p class="text-sm text-gray-500">Geen content beschikbaar.</p>');
 
         $this->mountAction('help');
+    }
+    protected function resolveTitleFromData(?array $data, string $slug): ?string
+    {
+        if (! $data) {
+            return null;
+        }
+
+        $page = $this->findPageBySlug($data, $slug);
+
+        return $page['title'] ?? $page['name'] ?? null;
+    }
+
+    protected function findPageBySlug(array $data, string $slug): ?array
+    {
+        foreach ($data['applications'] ?? [] as $app) {
+            foreach ($app['categories'] ?? [] as $cat) {
+                foreach ($cat['pages'] ?? [] as $page) {
+                    $pageSlug = $page['slug'] ?? $page['permalink'] ?? null;
+
+                    if (! empty($pageSlug) && $pageSlug === $slug) {
+                        return $page;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     public function render()

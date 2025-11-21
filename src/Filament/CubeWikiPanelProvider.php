@@ -2,7 +2,6 @@
 
 namespace TerpDev\CubeWikiPackage\Filament;
 
-use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -20,7 +19,6 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Log;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use TerpDev\CubeWikiPackage\Services\WikiCubeApiService;
 
@@ -34,7 +32,6 @@ class CubeWikiPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
-
             ->discoverResources(in: __DIR__ . '/Resources', for: 'TerpDev\\CubeWikiPackage\\Filament\\Resources')
             ->discoverPages(in: __DIR__ . '/Pages', for: 'TerpDev\\CubeWikiPackage\\Filament\\Pages')
             ->pages([])
@@ -87,7 +84,6 @@ class CubeWikiPanelProvider extends PanelProvider
 
                             $categoryItem = NavigationItem::make($category['name'] ?? 'Category')
                                 ->icon('heroicon-o-folder')
-                                // remove URL so clicking expands instead of navigating
                                 ->url(url('/cubewiki/knowledge-base?app=' . $selectedAppId . '&cat=' . ($category['id'] ?? '')))
                                 ->isActiveWhen(fn(): bool => (int)request()->query('cat') === (int)($category['id'] ?? 0))
                                 ->childItems($pageChildren);
