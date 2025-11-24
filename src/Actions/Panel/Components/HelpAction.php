@@ -24,7 +24,9 @@ class HelpAction extends Component implements HasActions, HasForms
     public ?string $contentHtml = null;
 
     protected ?array $knowledgeBaseData = null;
-
+    protected ?array $currentApp = null;
+    protected ?array $currentCategory = null;
+    protected ?array $currentPage = null;
     protected function getPages(): array
     {
         $rawPages = CubeWikiPlugin::getImportantPages();
@@ -33,7 +35,6 @@ class HelpAction extends Component implements HasActions, HasForms
         $result = [];
 
         foreach ($rawPages as $item) {
-            // 1) Alleen slug opgegeven: 'introduction'
             if (is_string($item)) {
                 $slug = $item;
                 $title = $this->resolveTitleFromData($data, $slug) ?? $slug;
@@ -45,9 +46,6 @@ class HelpAction extends Component implements HasActions, HasForms
                 if (! $slug) {
                     continue;
                 }
-
-                // Als dev zelf een title zet, die gebruiken.
-                // Anders uit de API proberen te halen.
                 $title = $item['title']
                     ?? $this->resolveTitleFromData($data, $slug)
                     ?? $slug;
@@ -76,7 +74,28 @@ class HelpAction extends Component implements HasActions, HasForms
         return Action::make('help')
             ->icon('heroicon-o-question-mark-circle')
             ->slideOver()
-            ->modalHeading(fn () => $this->title ?? 'Help')
+            ->modalHeading(function () {
+                $breadcrumbs = $this->getLocalBreadcrumbs();
+                $html = '<div class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">';
+
+                $last = array_key_last($breadcrumbs);
+                $i = 0;
+
+                foreach ($breadcrumbs as $label) {
+                    $html .= e($label);
+
+                    if ($i !== $last) {
+                        $html .= '<span class="text-gray-400 dark:text-gray-500 mx-1">›</span>';
+                    }
+
+                    $i++;
+                }
+
+                $html .= '</div>';
+
+                return new \Illuminate\Support\HtmlString($html);
+            })
+
             ->modalWidth('3xl')
             ->form([
                 Placeholder::make('page_content')
@@ -165,12 +184,22 @@ class HelpAction extends Component implements HasActions, HasForms
 
     protected function findPageBySlug(array $data, string $slug): ?array
     {
+        // reset
+        $this->currentApp = null;
+        $this->currentCategory = null;
+        $this->currentPage = null;
+
         foreach ($data['applications'] ?? [] as $app) {
             foreach ($app['categories'] ?? [] as $cat) {
                 foreach ($cat['pages'] ?? [] as $page) {
                     $pageSlug = $page['slug'] ?? $page['permalink'] ?? null;
 
                     if (! empty($pageSlug) && $pageSlug === $slug) {
+                        // hier bewaren we alles voor de breadcrumbs
+                        $this->currentApp = $app;
+                        $this->currentCategory = $cat;
+                        $this->currentPage = $page;
+
                         return $page;
                     }
                 }
@@ -178,6 +207,31 @@ class HelpAction extends Component implements HasActions, HasForms
         }
 
         return null;
+    }
+    public function getLocalBreadcrumbs(): array
+    {
+        $breadcrumbs = [];
+
+        $baseUrl = '/'.CubeWikiPlugin::$cubeWikiPanelPath.'/knowledge-base';
+
+        if ($this->currentApp) {
+            $appName = $this->currentApp['name'] ?? 'Applicatie';
+
+            $breadcrumbs[$baseUrl.'?app='.urlencode($appName)] = $appName;
+        }
+
+        if ($this->currentCategory) {
+            $appName = $this->currentApp['name'] ?? 'Applicatie';
+
+            $breadcrumbs[$baseUrl.'?app='.urlencode($appName).'&cat='.$this->currentCategory['id']] =
+                $this->currentCategory['name'] ?? 'Categorie';
+        }
+
+        if ($this->currentPage) {
+            $breadcrumbs['#'] = $this->currentPage['title'] ?? ($this->currentPage['name']);
+        }
+
+        return $breadcrumbs;
     }
 
     public function render()
