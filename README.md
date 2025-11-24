@@ -1,126 +1,108 @@
-# WikiCube Knowledge Base for Filament (Nederlandstalig)
+# WikiCube Knowledge Base for Filament
 
-Een gebruiksvriendelijke Filament-plugin waarmee je je WikiCube-kennisbank direct in het Filament-adminpanel toont. Je kunt meerdere tenants verbinden via API-tokens en de kennisbank bekijken met een georganiseerde, toegankelijke interface.
+Een gebruiksvriendelijke Filament-plugin waarmee je je
+WikiCube-kennisbank direct in het Filament-adminpanel toont.
+Je kunt een WikiCube tenant koppelen vie een API-token in je .env file
 
-Belangrijkste features
+## Showcase
+![first image](docs/images/one.png)
+![Second image](docs/images/two.png)
+![Third image](docs/images/three.png)
+![Fourth image](docs/images/four.png)
+![Fifth image](docs/images/five.png)
 
-- Koppel met één of meerdere WikiCube-tenant(s) via API-token.
-- Toon applicaties, categorieën en pagina's overzichtelijk in Filament.
-- Integratie met Filament-panels en -schemas (hint/important pages etc.).
-- Caching en refresh-functionaliteit.
+## Installation
+You can instll the package via composer:
 
-Vereisten
+```bash
+composer require terpdev/cubewikipackage
+```
+In your .env file add your WikiCube API details:
+
+```env
+WIKICUBE_API_URL=https://wikicube.test // Your WikiCube URL
+WIKICUBE_API_TOKEN=YOUR-API-TOKEN
+WIKICUBE_APPLICATION_NAME=YOUR-APPLICATION-NAME
+```
+## Prerequisites
 
 - PHP 8.1+
 - Laravel 11.28+
 - Filament v4+
 
-Installatie
+## Introduction
+This package allows you to see the CubeWiki knowledge base pages directly inside a Filament panel. 
+Which is added when you install the package with an documentation button on the bottom of the sidebar.
 
-Voeg het pakket toe met Composer:
+This package comes with two plugins, they are both for your regular Filament panels.
 
-```bash
-composer require terpdev/cubewikipackage
-```
 
-Registratie (optioneel)
+## CubeWikiAction plugins
+The CubeWikiAction plugin has two features you can use to enhance your regular Filament panels
 
-Standaard wordt het pakket automatisch geregistreerd als je het via Composer installeert en gebruikt binnen een Filament-panel. Als je handmatig wilt registreren (bijvoorbeeld in je eigen `AdminPanelProvider`), doe je dat zo:
+### HelpAction
+The helpaction allows you to add an help button to the navbar beside your user menu, you can add
+important pages to this button which open an dropdown and if you click on one of the 
+pages it will open a slideover with the content of that page from your WikiCube knowledge base.
 
+The pages get a slug in the API of WikiCube, add the right slug here to show it in the dropdown.
+In the dropdown you will see the title of the page as it is in WikiCube.
+
+Add this to your regular Filament panel provider:
 ```php
 use TerpDev\CubeWikiPackage\Filament\CubeWikiPlugin;
 
 public function panel(Panel $panel): Panel
 {
     return $panel
-        ->default()
         ->id('admin')
         ->path('admin')
+        // ...
         ->plugins([
             CubeWikiPlugin::make()
-        ]);
+                ->importantPages([
+                    ['slug' => 'YOUR-SLUG-NAME'],
+                ]),
+            ])
+       }
 }
 ```
+### Hint Action
+The hintaction allows you to add hints to your Filament form components. for example if you want 
+to show a hint for a slug field. This will add a help icon beside the field label, when you click
+on the label it will open a modal with the content of that hint page from your WikiCube knowledge base.
 
-Configuratie
-
-Publiceer en controleer de config (optioneel):
-
-```bash
-php artisan vendor:publish --tag=cubewikipackage-config
-```
-
-Voeg de volgende variabelen toe aan je `.env` (of controleer ze in `config/cubewikipackage.php`):
-
-```env
-WIKICUBE_API_URL=https://wikicube.example
-WIKICUBE_API_TOKEN=je-api-token
-WIKICUBE_APPLICATION_NAME=je-standaard-applicatie
-```
-
-Uitleg van instellingen
-
-- `WIKICUBE_API_URL`: De basis-URL van de WikiCube API van je tenant.
-- `WIKICUBE_API_TOKEN`: API-token om de knowledge base te lezen. Kan ook via UI ingevoerd worden als je dat zo wilt bouwen.
-- `WIKICUBE_APPLICATION_NAME`: Naam van de standaard applicatie die getoond wordt.
-
-Gebruik
-
-- In je Filament panel zie je een Documentation/Help-knop (meestal onderin de sidebar) die naar de knowledge base leidt.
-- Binnen de knowledge base kun je applicaties kiezen en vervolgens categorieën en pagina's doorbladeren.
-- Er is een refresh-knop om cache te legen en gegevens opnieuw van de API te laden.
-
-Plugin-opties (voorbeeld)
-
-Je kunt de plugin configureren met belangrijke/adviezen pagina's zodat deze als shortcuts of hints beschikbaar zijn:
-
-```php
-CubeWikiPlugin::make()
-    ->importantPages([
-       ['slug' => 'your-slug-name', 'title' => 'Custom Title']
-    ])
-    ->hintPages([
-       ['slug' => 'your-slug-name', 'title' => 'Custom Title']
-    ])
-```
-
-Hints in Filament Form Components
-
-Voorbeeld: een `TextInput` dat een hint toont via een Livewire-component van dit pakket:
-
+Add this to your Filament form component schema:
 ```php
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
+use TerpDev\CubeWikiPackage\Actions\Forms\Components\HelpAction as CubeWikiHelp;
 
-return $schema
-    ->components([
-        Section::make()
-            ->schema([
-                TextInput::make('slug')
-                    ->label('Slug')
-                    ->disabled()
-                    ->dehydrated()
-                    ->required()
-                    ->maxLength(255)
-                    ->unique(Post::class, 'slug', ignoreRecord: true)
-                    ->hint(function () {
-                        return new HtmlString(
-                            Blade::render(
-                                '<livewire:cubewikipackage-hintaction variant="hint" slug="your-slug-name" label="Custom Title" />'
+public static function configure(Schema $schema): Schema
+{
+    return $schema
+        ->components([
+            Section::make()
+                ->schema([
+                    TextInput::make('slug')
+                        ->label('Slug')
+                        ->disabled()
+                        ->required()
+                        ->unique(Post::class, 'slug', ignoreRecord: true)
+                        ->hintAction(CubeWikiHelp::make('YOUR-SLUG-NAME')
+                                ->label('YOUR-SLUG-LABEL')
                             )
-                        );
-                    }),
-            ]),
-    ]);
+                ]),
+])
+}
 ```
+## Accesing the Knowledge Base Panel
+After installing the package it will automatically add an documentation button on the bottom of the sidebar
+which links to the knowledge base panel.
 
-Troubleshooting
+![Documentation Button](docs/images/documentation-button.png)
 
-- "Geen data zichtbaar": controleer `WIKICUBE_API_URL` en `WIKICUBE_API_TOKEN`.
-- "Sticky sidebar werkt niet": dit is meestal CSS/JS-gerelateerd. De plugin levert standaard structuur; als je custom theme of Tailwind-config hebt, controleer dan of `.sticky`-class en position: sticky toegestaan zijn binnen de container en dat er geen overflow: hidden is op een ouder-element.
-- "Breadcrumbs te vaak zichtbaar": als je breadcrumbs alleen wilt tonen op paginapagina's (niet op index/list views), verplaats de rendering van breadcrumbs naar de specifieke page-view of guard ermee via een conditie (bijv. alleen renderen als er een huidige pagina-slug aanwezig is).
 
 Ontwikkeling & testen
 
@@ -154,3 +136,5 @@ Als je wilt, kan ik ook specifiek een korte sectie toevoegen met:
 - Voorstellen voor unit tests rond de View-logic (bijv. breadcrumbs alleen tonen wanneer een pagina is geselecteerd)
 
 Laat weten welke van die extra's je wil, dan voeg ik ze direct toe.
+
+

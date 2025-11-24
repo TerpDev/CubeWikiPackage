@@ -59,6 +59,8 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
     public function packageRegistered(): void
     {
         $this->app->register(CubeWikiPanelProvider::class);
+        $this->mergeConfigFrom(__DIR__.'/../config/cubewikipackage.php', 'cubewikipackage');
+
     }
 
     public function packageBooted(): void
@@ -68,7 +70,9 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
         Livewire::component('cubewiki-sidebar', Sidebar::class);
 
         $this->ensureCubeWikiSessionDefaults();
-
+        $this->publishes([
+            __DIR__.'/../config/cubewikipackage.php' => config_path('cubewikipackage.php'),
+        ], 'cubewikipackage-config');
         FilamentAsset::register(
             $this->getAssets(),
             $this->getAssetPackageName()
