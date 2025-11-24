@@ -24,9 +24,13 @@ class HelpAction extends Component implements HasActions, HasForms
     public ?string $contentHtml = null;
 
     protected ?array $knowledgeBaseData = null;
+
     protected ?array $currentApp = null;
+
     protected ?array $currentCategory = null;
+
     protected ?array $currentPage = null;
+
     protected function getPages(): array
     {
         $rawPages = CubeWikiPlugin::getImportantPages();
@@ -208,6 +212,7 @@ class HelpAction extends Component implements HasActions, HasForms
 
         return null;
     }
+
     public function getLocalBreadcrumbs(): array
     {
         $breadcrumbs = [];

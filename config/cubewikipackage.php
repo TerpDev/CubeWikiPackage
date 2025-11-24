@@ -30,5 +30,6 @@ return [
     |
     */
     'default_application' => env('WIKICUBE_APPLICATION_NAME', null),
+    'cache_enabled' => env('WIKICUBE_CACHE_ENABLED', true),
     'cache_duration' => env('WIKICUBE_CACHE_DURATION', 5),
 ];

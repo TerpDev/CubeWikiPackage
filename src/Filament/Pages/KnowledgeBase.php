@@ -69,7 +69,7 @@ class KnowledgeBase extends Page implements HasForms
             } else {
                 $resolvedAppId = $this->getAppIdByName($appParam);
             }
-        } elseif ($sessionAppId && $this->appExistsById((int) $sessionAppId)) {
+        } elseif ($sessionAppId && $this->getApplicationById((int) $sessionAppId)) {
             $resolvedAppId = (int) $sessionAppId;
         } elseif ($sessionAppName && ($id = $this->getAppIdByName($sessionAppName))) {
             $resolvedAppId = $id;
@@ -125,7 +125,6 @@ class KnowledgeBase extends Page implements HasForms
                 ->statePath('formData');
         }
 
-        // Geen pagina gekozen
         return $schema
             ->schema([
                 Placeholder::make('welcome')
@@ -169,6 +168,16 @@ class KnowledgeBase extends Page implements HasForms
         }
     }
 
+    public function getSelectedApplication(): ?array
+    {
+        if (! $this->selectedApplicationId) {
+            return null;
+        }
+
+        return collect($this->knowledgeBaseData['applications'] ?? [])
+            ->firstWhere('id', $this->selectedApplicationId);
+    }
+
     public function selectCategory(?int $categoryId): void
     {
         $this->selectedCategoryId = $categoryId ?: null;
@@ -176,6 +185,27 @@ class KnowledgeBase extends Page implements HasForms
         $this->selectedPageTitle = null;
         $this->selectedPageContentHtml = null;
         $this->pageHeadings = [];
+    }
+
+    public function getSelectedCategory(): ?array
+    {
+        if (! $this->selectedCategoryId) {
+            return null;
+        }
+
+        return collect($this->getCategoriesForSelectedApp())
+            ->firstWhere('id', $this->selectedCategoryId);
+    }
+
+    public function getCategoriesForSelectedApp(): array
+    {
+        $app = $this->getSelectedApplication();
+
+        if (! $app) {
+            return [];
+        }
+
+        return $app['categories'] ?? [];
     }
 
     public function openPage(int $pageId): void
@@ -305,37 +335,6 @@ class KnowledgeBase extends Page implements HasForms
         return $html;
     }
 
-    public function getSelectedApplication(): ?array
-    {
-        if (! $this->selectedApplicationId) {
-            return null;
-        }
-
-        return collect($this->knowledgeBaseData['applications'] ?? [])
-            ->firstWhere('id', $this->selectedApplicationId);
-    }
-
-    public function getCategoriesForSelectedApp(): array
-    {
-        $app = $this->getSelectedApplication();
-
-        if (! $app) {
-            return [];
-        }
-
-        return $app['categories'] ?? [];
-    }
-
-    public function getSelectedCategory(): ?array
-    {
-        if (! $this->selectedCategoryId) {
-            return null;
-        }
-
-        return collect($this->getCategoriesForSelectedApp())
-            ->firstWhere('id', $this->selectedCategoryId);
-    }
-
     protected function findPageById(int $pageId): ?array
     {
         foreach ($this->getCategoriesForSelectedApp() as $cat) {
@@ -358,17 +357,6 @@ class KnowledgeBase extends Page implements HasForms
         }
 
         return null;
-    }
-
-    protected function appExistsById(int $id): bool
-    {
-        foreach ($this->knowledgeBaseData['applications'] ?? [] as $app) {
-            if (isset($app['id']) && (int) $app['id'] === $id) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     protected function getApplicationById(int $id): ?array

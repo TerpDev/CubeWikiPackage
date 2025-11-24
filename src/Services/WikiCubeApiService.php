@@ -3,51 +3,85 @@
 namespace TerpDev\CubeWikiPackage\Services;
 
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
+use Saloon\CachePlugin\Contracts\Cacheable;
+use Saloon\CachePlugin\Contracts\Driver;
+use Saloon\CachePlugin\Drivers\LaravelCacheDriver;
+use Saloon\CachePlugin\Traits\HasCaching;
+use Saloon\Enums\Method;
+use Saloon\Http\Connector;
+use Saloon\Http\PendingRequest;
+use Saloon\Http\Request;
+use TerpDev\CubeWikiPackage\Services\Requests\KnowledgeBaseRequest;
 
-class WikiCubeApiService
+class WikiCubeApiService extends Connector implements Cacheable
 {
-    protected string $apiUrl;
+    use HasCaching;
 
-    public function __construct()
+    protected Method $method = Method::GET;
+
+    public function resolveBaseUrl(): string
     {
-        $this->apiUrl = rtrim(config('cubewikipackage.api_url', 'https://wikicube.test'), '/');
+        return rtrim(config('cubewikipackage.api_url', 'https://wikicube.test'), '/');
     }
 
     public function fetchKnowledgeBase(string $token, ?int $applicationId = null): array
     {
-        $cacheKey = $this->getCacheKey($token, $applicationId);
+        $request = new KnowledgeBaseRequest($token, $applicationId);
 
-        return Cache::remember(
-            $cacheKey,
-            now()->addMinutes(config('cubewikipackage.cache_duration', 5)),
-            function () use ($token, $applicationId) {
-                $url = "{$this->apiUrl}/api/data/{$token}";
+        $this->toggleCachingForRequest($request);
 
-                $response = Http::timeout(30)
-                    ->withOptions(['verify' => false])
-                    ->get($url, array_filter([
-                        'application_id' => $applicationId,
-                    ]));
-
-                if ($response->successful()) {
-                    $data = $response->json();
-
-                    if (! isset($data['success']) || ! $data['success']) {
-                        throw new \Exception($data['message'] ?? 'Invalid token or no data found');
-                    }
-
-                    return $data;
-                }
-
-                throw new \Exception('Failed to fetch knowledge base data. Status: '.$response->status());
-            }
-        );
+        return $this->sendRequest($request);
     }
 
-    public function clearCache(string $token, ?int $applicationId = null): void
+    protected function sendRequest(Request $request): array
     {
-        Cache::forget($this->getCacheKey($token, $applicationId));
+        $response = $this->send($request);
+        $response->throw();
+
+        $data = $response->json();
+
+        if (! ($data['success'] ?? false)) {
+            throw new \Exception($data['message'] ?? 'Invalid token or no data found');
+        }
+
+        return $data;
+    }
+
+    protected function shouldCache(): bool
+    {
+        $value = config('cubewikipackage.cache_enabled', true);
+
+        $parsed = filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE);
+
+        return $parsed ?? (bool) $value;
+    }
+
+    protected function cacheDurationMinutes(): int
+    {
+        $value = config('cubewikipackage.cache_duration', 5);
+
+        $minutes = is_numeric($value) ? (int) $value : 5;
+
+        return max($minutes, 1);
+    }
+
+    protected function toggleCachingForRequest(Request $request): void
+    {
+        if (! $this->shouldCache()) {
+            $this->disableCaching();
+
+            if (method_exists($request, 'disableCaching')) {
+                $request->disableCaching();
+            }
+
+            return;
+        }
+
+        $this->enableCaching();
+
+        if (method_exists($request, 'enableCaching')) {
+            $request->enableCaching();
+        }
     }
 
     protected function getCacheKey(string $token, ?int $applicationId = null): string
@@ -55,5 +89,26 @@ class WikiCubeApiService
         return $applicationId
             ? "wikicube_data_{$token}_app_{$applicationId}"
             : "wikicube_data_{$token}";
+    }
+
+    public function resolveCacheDriver(): Driver
+    {
+        return new LaravelCacheDriver(Cache::store());
+    }
+
+    public function cacheExpiryInSeconds(): int
+    {
+        return $this->cacheDurationMinutes() * 60;
+    }
+
+    protected function cacheKey(PendingRequest $pendingRequest): ?string
+    {
+        $request = $pendingRequest->getRequest();
+
+        if ($request instanceof KnowledgeBaseRequest) {
+            return $this->getCacheKey($request->getToken(), $request->getApplicationId());
+        }
+
+        return null;
     }
 }

@@ -22,6 +22,8 @@ In your .env file add your WikiCube API details:
 WIKICUBE_API_URL=https://wikicube.test // Your WikiCube URL
 WIKICUBE_API_TOKEN=YOUR-API-TOKEN
 WIKICUBE_APPLICATION_NAME=YOUR-APPLICATION-NAME
+WIKICUBE_CACHE_ENABLED=true // Set to false to disable API response caching
+WIKICUBE_CACHE_DURATION=5   // Cache duration in minutes
 ```
 ## Prerequisites
 
@@ -33,7 +35,7 @@ WIKICUBE_APPLICATION_NAME=YOUR-APPLICATION-NAME
 This package allows you to see the CubeWiki knowledge base pages directly inside a Filament panel. 
 Which is added when you install the package with an documentation button on the bottom of the sidebar.
 
-This package comes with two plugins, they are both for your regular Filament panels.
+This package comes with one plugin with multiple features, they are both for your regular Filament panels.
 
 
 ## CubeWikiAction plugins
@@ -135,5 +137,4 @@ Als je wilt, kan ik ook specifiek een korte sectie toevoegen met:
 - Voorstellen voor unit tests rond de View-logic (bijv. breadcrumbs alleen tonen wanneer een pagina is geselecteerd)
 
 Laat weten welke van die extra's je wil, dan voeg ik ze direct toe.
-
 
