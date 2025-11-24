@@ -1,12 +1,10 @@
 # WikiCube Knowledge Base for Filament
 
-Een gebruiksvriendelijke Filament-plugin waarmee je je
-WikiCube-kennisbank direct in het Filament-adminpanel toont.
-Je kunt een WikiCube tenant koppelen vie een API-token in je .env file
+Welcome this is a package which integrates the WikiCube knowledge base into your Filament panels.
+
 
 ## Showcase
 ![first image](Docs/images/one.png)
-![first image]()
 ![Second image](Docs/images/two.png)
 ![Third image](Docs/images/three.png)
 ![Fourth image](Docs/images/four.png)
