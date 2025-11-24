@@ -5,12 +5,12 @@ WikiCube-kennisbank direct in het Filament-adminpanel toont.
 Je kunt een WikiCube tenant koppelen vie een API-token in je .env file
 
 ## Showcase
-![first image](img/images/one.png)
+![first image](Docs/images/one.png)
 ![first image]()
-![Second image](img/images/two.png)
-![Third image](img/images/three.png)
-![Fourth image](img/images/four.png)
-![Fifth image](img/images/five.png)
+![Second image](Docs/images/two.png)
+![Third image](Docs/images/three.png)
+![Fourth image](Docs/images/four.png)
+![Fifth image](Docs/images/five.png)
 
 ## Installation
 You can instll the package via composer:
@@ -102,7 +102,7 @@ public static function configure(Schema $schema): Schema
 After installing the package it will automatically add an documentation button on the bottom of the sidebar
 which links to the knowledge base panel.
 
-![Documentation Button](img/images/documentation-button.png)
+![Documentation Button](Docs/images/documentation-button.png)
 
 
 Ontwikkeling & testen
