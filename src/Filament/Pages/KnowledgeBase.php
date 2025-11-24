@@ -93,7 +93,6 @@ class KnowledgeBase extends Page implements HasForms
         if ($this->selectedPageContentHtml) {
             return $schema
                 ->schema([
-                    // Breadcrumbs - alleen tonen als er een pagina actief is
                     Placeholder::make('breadcrumbs')
                         ->hiddenLabel()
                         ->columnSpan(['md' => 4, 'lg' => 4])
@@ -102,7 +101,6 @@ class KnowledgeBase extends Page implements HasForms
                             'breadcrumbs' => $this->getLocalBreadcrumbs(),
                         ])),
 
-                    // Linkerkolom: content
                     Placeholder::make('page_content')
                         ->hiddenLabel()
                         ->columnSpan(['md' => 3, 'lg' => 3])
@@ -112,7 +110,6 @@ class KnowledgeBase extends Page implements HasForms
                             '</div>'
                         )),
 
-                    // Rechterkolom: TOC
                     Placeholder::make('toc')
                         ->hiddenLabel()
                         ->columnSpan(['md' => 1, 'lg' => 1])
@@ -236,6 +233,8 @@ class KnowledgeBase extends Page implements HasForms
                 $existingClass = $node->getAttribute('class');
                 $newClass = trim($existingClass.' scroll-mt-24');
                 $node->setAttribute('class', $newClass);
+
+                $this->prependMarkdownPrefix($node, $level);
             } else {
                 $id = Str::slug($text);
             }
@@ -257,6 +256,30 @@ class KnowledgeBase extends Page implements HasForms
 
             $this->selectedPageContentHtml = $innerHtml;
         }
+    }
+
+    protected function prependMarkdownPrefix(\DOMElement $node, int $level): void
+    {
+        if ($node->hasAttribute('data-markdown-prefixed') || ! $node->ownerDocument) {
+            return;
+        }
+
+        $doc = $node->ownerDocument;
+        $prefixText = '# ';
+
+        $prefixSpan = $doc->createElement('span');
+        $prefixSpan->setAttribute('data-markdown-prefix', 'true');
+        $prefixSpan->setAttribute('style', 'color: var(--primary-600, var(--primary-color, currentColor));');
+        $prefixSpan->setAttribute('aria-hidden', 'true');
+        $prefixSpan->textContent = $prefixText;
+
+        if ($node->firstChild) {
+            $node->insertBefore($prefixSpan, $node->firstChild);
+        } else {
+            $node->appendChild($prefixSpan);
+        }
+
+        $node->setAttribute('data-markdown-prefixed', 'true');
     }
 
     protected function renderTocHtml(): string
@@ -326,8 +349,6 @@ class KnowledgeBase extends Page implements HasForms
         return null;
     }
 
-    // ---- Helpers om op naam/id te kunnen resolven ----
-
     protected function getAppIdByName(string $name): ?int
     {
         foreach ($this->knowledgeBaseData['applications'] ?? [] as $app) {
@@ -371,7 +392,6 @@ class KnowledgeBase extends Page implements HasForms
         $breadcrumbs = [];
 
         if ($this->selectedApplicationId && ($app = $this->getSelectedApplication())) {
-            // Gebruik NAAM in de URL i.p.v. id
             $appName = $app['name'] ?? 'Applicatie';
 
             $breadcrumbs[static::getUrl([
