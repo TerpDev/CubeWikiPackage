@@ -11,7 +11,7 @@ Welcome this is a package which integrates the WikiCube knowledge base into your
 ![Fifth image](Docs/images/five.png)
 
 ## Installation
-You can instll the package via composer:
+You can install the package via composer:
 
 ```bash
 composer require terpdev/cubewikipackage
