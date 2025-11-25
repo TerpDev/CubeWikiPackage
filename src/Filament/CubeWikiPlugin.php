@@ -13,9 +13,6 @@ class CubeWikiPlugin implements Plugin
 {
     public static string $cubeWikiPanelPath = 'cubewiki';
 
-    public static string $buttonLabel = 'Documentation';
-
-    public static string $buttonIcon = 'heroicon-o-book-open';
 
     public static array $importantPages = [];
 

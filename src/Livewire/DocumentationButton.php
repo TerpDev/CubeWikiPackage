@@ -14,12 +14,11 @@ class DocumentationButton extends Component implements HasActions, HasForms
 {
     use InteractsWithActions;
     use InteractsWithForms;
-
     public function createAction(): Action
     {
         return Action::make('create')
-            ->label(CubeWikiPlugin::$buttonLabel)
-            ->icon(CubeWikiPlugin::$buttonIcon)
+            ->label('Documentation')
+            ->icon('heroicon-o-book-open')
             ->action(function () {
                 $token = config('cubewikipackage.api_token');
 
@@ -46,8 +45,8 @@ class DocumentationButton extends Component implements HasActions, HasForms
     {
         return view('cubewikipackage::livewire.documentation-button', [
             'url' => '/'.CubeWikiPlugin::$cubeWikiPanelPath,
-            'label' => CubeWikiPlugin::$buttonLabel,
-            'icon' => CubeWikiPlugin::$buttonIcon,
+            'label' => 'Documentation',
+            'icon' => 'heroicon-o-book-open',
         ]);
     }
 }
