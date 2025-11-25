@@ -71,32 +71,24 @@ public function panel(Panel $panel): Panel
 ### Hint Action
 The hintaction allows you to add hints to your Filament form components. for example if you want 
 to show a hint for a slug field. This will add a help icon beside the field label, when you click
-on the label it will open a modal with the content of that hint page from your WikiCube knowledge base.
+on the label it will open a modal or slideover with the content of that hint page from your 
+WikiCube knowledge base.
 
-Add this to your Filament form component schema:
+Add this to your Filament form component for a modal to open:
 ```php
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Section;
 use TerpDev\CubeWikiPackage\Actions\Forms\Components\HelpAction as CubeWikiHelp;
 
-public static function configure(Schema $schema): Schema
-{
-    return $schema
-        ->components([
-            Section::make()
-                ->schema([
-                    TextInput::make('slug')
-                        ->label('Slug')
-                        ->disabled()
-                        ->required()
-                        ->unique(Post::class, 'slug', ignoreRecord: true)
-                        ->hintAction(CubeWikiHelp::make('YOUR-SLUG-NAME')
-                                ->label('YOUR-SLUG-LABEL')
-                            )
-                ]),
-])
-}
+->hintAction(CubeWikiHelp::makeModal('YOUR-SLUG-NAME')
+        ->label('YOUR-SLUG-LABEL')
+)
+```
+Add this to your Filament form component for a slideover to open:
+```php
+use TerpDev\CubeWikiPackage\Actions\Forms\Components\HelpAction as CubeWikiHelp;
+
+->hintAction(CubeWikiHelp::makeSlideOver('YOUR-SLUG-NAME')
+        ->label('YOUR-SLUG-LABEL')
+)
 ```
 ## Accesing the Knowledge Base Panel
 After installing the package it will automatically add an documentation button on the bottom of the sidebar

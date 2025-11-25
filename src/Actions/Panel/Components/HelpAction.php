@@ -42,12 +42,11 @@ class HelpAction extends Component implements HasActions, HasForms
             if (is_string($item)) {
                 $slug = $item;
                 $title = $this->resolveTitleFromData($data, $slug) ?? $slug;
-            }
-            // 2) Array met slug en optioneel title
+            } // 2) Array met slug en optioneel title
             elseif (is_array($item)) {
                 $slug = $item['slug'] ?? null;
 
-                if (! $slug) {
+                if (!$slug) {
                     continue;
                 }
                 $title = $item['title']
@@ -80,34 +79,31 @@ class HelpAction extends Component implements HasActions, HasForms
             ->slideOver()
             ->modalHeading(function () {
                 $breadcrumbs = $this->getLocalBreadcrumbs();
+
                 $html = '<div class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">';
 
-                $last = array_key_last($breadcrumbs);
-                $i = 0;
+                $lastKey = array_key_last($breadcrumbs);
 
-                foreach ($breadcrumbs as $label) {
+                foreach ($breadcrumbs as $key => $label) {
                     $html .= e($label);
 
-                    if ($i !== $last) {
+                    if ($key !== $lastKey) {
                         $html .= '<span class="text-gray-400 dark:text-gray-500 mx-1">›</span>';
                     }
-
-                    $i++;
                 }
 
                 $html .= '</div>';
 
                 return new \Illuminate\Support\HtmlString($html);
             })
-
             ->modalWidth('3xl')
             ->form([
                 Placeholder::make('page_content')
                     ->hiddenLabel()
-                    ->content(fn () => new HtmlString(
+                    ->content(fn() => new HtmlString(
                         '<div class="prose dark:prose-invert max-w-3xl mx-auto">'
-                        .($this->contentHtml)
-                        .'</div>'
+                        . ($this->contentHtml)
+                        . '</div>'
                     )),
             ])
             ->modalSubmitAction(false);
@@ -121,7 +117,7 @@ class HelpAction extends Component implements HasActions, HasForms
 
         $token = $this->resolveApiToken();
 
-        if (! $token) {
+        if (!$token) {
             return $this->knowledgeBaseData = null;
         }
 
@@ -146,7 +142,7 @@ class HelpAction extends Component implements HasActions, HasForms
     {
         $data = $this->getKnowledgeBaseData();
 
-        if (! $data) {
+        if (!$data) {
             Notification::make()
                 ->warning()
                 ->title('Geen API-token')
@@ -158,7 +154,7 @@ class HelpAction extends Component implements HasActions, HasForms
 
         $found = $this->findPageBySlug($data, $slug);
 
-        if (! $found) {
+        if (!$found) {
             Notification::make()
                 ->warning()
                 ->title('Pagina niet gevonden')
@@ -168,16 +164,15 @@ class HelpAction extends Component implements HasActions, HasForms
             return;
         }
 
-        $this->title = $found['title'] ?? ($found['name'] ?? 'Help');
-        $this->contentHtml = $found['content_html']
-            ?? ($found['content'] ?? '<p class="text-sm text-gray-500">Geen content beschikbaar.</p>');
+        $this->title = $found['title'];
+        $this->contentHtml = $found['content_html'];
 
         $this->mountAction('help');
     }
 
     protected function resolveTitleFromData(?array $data, string $slug): ?string
     {
-        if (! $data) {
+        if (!$data) {
             return null;
         }
 
@@ -198,12 +193,10 @@ class HelpAction extends Component implements HasActions, HasForms
                 foreach ($cat['pages'] ?? [] as $page) {
                     $pageSlug = $page['slug'] ?? $page['permalink'] ?? null;
 
-                    if (! empty($pageSlug) && $pageSlug === $slug) {
-                        // hier bewaren we alles voor de breadcrumbs
+                    if (!empty($pageSlug) && $pageSlug === $slug) {
                         $this->currentApp = $app;
                         $this->currentCategory = $cat;
                         $this->currentPage = $page;
-
                         return $page;
                     }
                 }
@@ -217,19 +210,19 @@ class HelpAction extends Component implements HasActions, HasForms
     {
         $breadcrumbs = [];
 
-        $baseUrl = '/'.CubeWikiPlugin::$cubeWikiPanelPath.'/knowledge-base';
+        $baseUrl = '/' . CubeWikiPlugin::$cubeWikiPanelPath . '/knowledge-base';
 
         if ($this->currentApp) {
-            $appName = $this->currentApp['name'] ?? 'Applicatie';
+            $appName = $this->currentApp['name'];
 
-            $breadcrumbs[$baseUrl.'?app='.urlencode($appName)] = $appName;
+            $breadcrumbs[$baseUrl . '?app=' . urlencode($appName)] = $appName;
         }
 
         if ($this->currentCategory) {
-            $appName = $this->currentApp['name'] ?? 'Applicatie';
+            $appName = $this->currentApp['name'];
 
-            $breadcrumbs[$baseUrl.'?app='.urlencode($appName).'&cat='.$this->currentCategory['id']] =
-                $this->currentCategory['name'] ?? 'Categorie';
+            $breadcrumbs[$baseUrl . '?app=' . urlencode($appName) . '&cat=' . $this->currentCategory['id']] =
+                $this->currentCategory['name'];
         }
 
         if ($this->currentPage) {
