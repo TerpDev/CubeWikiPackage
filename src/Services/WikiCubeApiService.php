@@ -3,7 +3,6 @@
 namespace TerpDev\CubeWikiPackage\Services;
 
 use Saloon\Http\Connector;
-use Saloon\Http\Request;
 use TerpDev\CubeWikiPackage\Services\Requests\KnowledgeBaseRequest;
 
 class WikiCubeApiService extends Connector
@@ -12,9 +11,10 @@ class WikiCubeApiService extends Connector
     {
         return rtrim(config('cubewikipackage.api_url', 'https://wikicube.test'), '/');
     }
+
     public function fetchKnowledgeBase(string $token, ?int $applicationId = null): array
     {
-        $request  = new KnowledgeBaseRequest($token, $applicationId);
+        $request = new KnowledgeBaseRequest($token, $applicationId);
         $response = $this->send($request);
 
         // Gooit exception bij 4xx/5xx

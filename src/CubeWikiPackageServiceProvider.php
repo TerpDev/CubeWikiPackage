@@ -19,6 +19,7 @@ use TerpDev\CubeWikiPackage\Actions\Panel\Components\HelpAction as PanelHelpActi
 use TerpDev\CubeWikiPackage\Commands\CubeWikiPackageCommand;
 use TerpDev\CubeWikiPackage\Filament\CubeWikiPanelProvider;
 use TerpDev\CubeWikiPackage\Filament\Pages\Sidebar;
+use TerpDev\CubeWikiPackage\Livewire\BackToPanelButton;
 use TerpDev\CubeWikiPackage\Livewire\DocumentationButton;
 
 class CubeWikiPackageServiceProvider extends PackageServiceProvider
@@ -67,6 +68,7 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
     {
         Livewire::component('cubewikipackage-helpaction', PanelHelpAction::class);
         Livewire::component('cubewikipackage-documentation-button', DocumentationButton::class);
+        Livewire::component('cubewikipackage-back-to-panel-button', BackToPanelButton::class);
         Livewire::component('cubewiki-sidebar', Sidebar::class);
 
         $this->ensureCubeWikiSessionDefaults();
@@ -84,10 +86,14 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
                 $currentPanel = Filament::getCurrentPanel();
 
                 if ($currentPanel?->getId() === self::$cubeWikiPanelPath) {
-                    return '';
+                    return Blade::render('<livewire:cubewikipackage-back-to-panel-button />');
                 }
 
-                return Blade::render('<livewire:cubewikipackage-documentation-button />');
+                if ($currentPanel) {
+                    return Blade::render('<livewire:cubewikipackage-documentation-button />');
+                }
+
+                return '';
             }
         );
         FilamentAsset::registerScriptData(

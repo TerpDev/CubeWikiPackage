@@ -5,6 +5,7 @@ namespace TerpDev\CubeWikiPackage\Livewire;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Facades\Filament;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Livewire\Component;
@@ -14,6 +15,7 @@ class DocumentationButton extends Component implements HasActions, HasForms
 {
     use InteractsWithActions;
     use InteractsWithForms;
+
     public function createAction(): Action
     {
         return Action::make('create')
@@ -23,6 +25,11 @@ class DocumentationButton extends Component implements HasActions, HasForms
                 $token = config('cubewikipackage.api_token');
 
                 $applicationName = config('cubewikipackage.default_application');
+
+                $currentPanel = Filament::getCurrentPanel();
+                if ($currentPanel) {
+                    session(['cubewiki_return_panel' => $currentPanel->getId()]);
+                }
 
                 if ($token) {
                     session(['cubewiki_token' => $token]);

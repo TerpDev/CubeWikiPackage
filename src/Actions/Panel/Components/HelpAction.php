@@ -46,7 +46,7 @@ class HelpAction extends Component implements HasActions, HasForms
             elseif (is_array($item)) {
                 $slug = $item['slug'] ?? null;
 
-                if (!$slug) {
+                if (! $slug) {
                     continue;
                 }
                 $title = $item['title']
@@ -100,10 +100,10 @@ class HelpAction extends Component implements HasActions, HasForms
             ->form([
                 Placeholder::make('page_content')
                     ->hiddenLabel()
-                    ->content(fn() => new HtmlString(
+                    ->content(fn () => new HtmlString(
                         '<div class="prose dark:prose-invert max-w-3xl mx-auto">'
-                        . ($this->contentHtml)
-                        . '</div>'
+                        .($this->contentHtml)
+                        .'</div>'
                     )),
             ])
             ->modalSubmitAction(false);
@@ -117,7 +117,7 @@ class HelpAction extends Component implements HasActions, HasForms
 
         $token = $this->resolveApiToken();
 
-        if (!$token) {
+        if (! $token) {
             return $this->knowledgeBaseData = null;
         }
 
@@ -142,7 +142,7 @@ class HelpAction extends Component implements HasActions, HasForms
     {
         $data = $this->getKnowledgeBaseData();
 
-        if (!$data) {
+        if (! $data) {
             Notification::make()
                 ->warning()
                 ->title('Geen API-token')
@@ -154,7 +154,7 @@ class HelpAction extends Component implements HasActions, HasForms
 
         $found = $this->findPageBySlug($data, $slug);
 
-        if (!$found) {
+        if (! $found) {
             Notification::make()
                 ->warning()
                 ->title('Pagina niet gevonden')
@@ -172,7 +172,7 @@ class HelpAction extends Component implements HasActions, HasForms
 
     protected function resolveTitleFromData(?array $data, string $slug): ?string
     {
-        if (!$data) {
+        if (! $data) {
             return null;
         }
 
@@ -193,10 +193,11 @@ class HelpAction extends Component implements HasActions, HasForms
                 foreach ($cat['pages'] ?? [] as $page) {
                     $pageSlug = $page['slug'] ?? $page['permalink'] ?? null;
 
-                    if (!empty($pageSlug) && $pageSlug === $slug) {
+                    if (! empty($pageSlug) && $pageSlug === $slug) {
                         $this->currentApp = $app;
                         $this->currentCategory = $cat;
                         $this->currentPage = $page;
+
                         return $page;
                     }
                 }
@@ -210,18 +211,18 @@ class HelpAction extends Component implements HasActions, HasForms
     {
         $breadcrumbs = [];
 
-        $baseUrl = '/' . CubeWikiPlugin::$cubeWikiPanelPath . '/knowledge-base';
+        $baseUrl = '/'.CubeWikiPlugin::$cubeWikiPanelPath.'/knowledge-base';
 
         if ($this->currentApp) {
             $appName = $this->currentApp['name'];
 
-            $breadcrumbs[$baseUrl . '?app=' . urlencode($appName)] = $appName;
+            $breadcrumbs[$baseUrl.'?app='.urlencode($appName)] = $appName;
         }
 
         if ($this->currentCategory) {
             $appName = $this->currentApp['name'];
 
-            $breadcrumbs[$baseUrl . '?app=' . urlencode($appName) . '&cat=' . $this->currentCategory['id']] =
+            $breadcrumbs[$baseUrl.'?app='.urlencode($appName).'&cat='.$this->currentCategory['id']] =
                 $this->currentCategory['name'];
         }
 

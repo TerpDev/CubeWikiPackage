@@ -19,25 +19,16 @@ class HelpAction extends Action
             ->modalSubmitAction(false)
             ->modalContent(fn () => new HtmlString(
                 '<div class="prose dark:prose-invert max-w-none">'
-                . static::resolveHtmlForSlug($this->name)
-                . '</div>'
+                .static::resolveHtmlForSlug($this->name)
+                .'</div>'
             ));
     }
-    public static function makeModal(string $name): static
-    {
-        return static::make($name);
-    }
-    public static function makeSlideOver(string $name): static
-    {
-        return static::make($name)->slideOver();
-    }
-
     protected static function resolveHtmlForSlug(string $slug): string
     {
-        $token   = static::resolveApiToken();
+        $token = static::resolveApiToken();
         $service = app(WikiCubeApiService::class);
-        $data    = $service->fetchKnowledgeBase($token, null);
-        $page    = static::findPageBySlug($data, $slug);
+        $data = $service->fetchKnowledgeBase($token, null);
+        $page = static::findPageBySlug($data, $slug);
 
         return $page['content_html'];
     }

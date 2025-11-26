@@ -4,11 +4,11 @@ Welcome this is a package which integrates the WikiCube knowledge base into your
 
 
 ## Showcase
-![first image](Docs/images/one.png)
-![Second image](Docs/images/two.png)
-![Third image](Docs/images/three.png)
-![Fourth image](Docs/images/four.png)
-![Fifth image](Docs/images/five.png)
+![first image](Docs/images/helpaction.png)
+![Second image](Docs/images/helpactionopen.png)
+![Third image](Docs/images/hintaction.png)
+![Fourth image](Docs/images/hintactionopen.png)
+![Fifth image](Docs/images/knowledgebase.png)
 
 ## Installation
 You can install the package via composer:
@@ -74,59 +74,75 @@ to show a hint for a slug field. This will add a help icon beside the field labe
 on the label it will open a modal or slideover with the content of that hint page from your 
 WikiCube knowledge base.
 
-Add this to your Filament form component for a modal to open:
+Add this to your Filament form component:
 ```php
 use TerpDev\CubeWikiPackage\Actions\Forms\Components\HelpAction as CubeWikiHelp;
 
-->hintAction(CubeWikiHelp::makeModal('YOUR-SLUG-NAME')
+->hintAction(CubeWikiHelp::make('YOUR-SLUG-NAME')
         ->label('YOUR-SLUG-LABEL')
 )
 ```
-Add this to your Filament form component for a slideover to open:
+If you want a slideover instead of a modal add this to the hintaction:
 ```php
 use TerpDev\CubeWikiPackage\Actions\Forms\Components\HelpAction as CubeWikiHelp;
 
-->hintAction(CubeWikiHelp::makeSlideOver('YOUR-SLUG-NAME')
+->hintAction(CubeWikiHelp::make('YOUR-SLUG-NAME')
         ->label('YOUR-SLUG-LABEL')
+        ->slideOver()
 )
 ```
 ## Accesing the Knowledge Base Panel
 After installing the package it will automatically add an documentation button on the bottom of the sidebar
 which links to the knowledge base panel.
 
-![Documentation Button](Docs/images/documentation-button.png)
+![Documentation Button](Docs/images/doc-button.png)
 
+## Knowledge Base Panel
+When you have clicked on the documentation button there will open a panel with the knowledge base pages
+fetched from your API_TOKEN you filled in your .env file.
 
-Ontwikkeling & testen
+You will see a Terug naar panel button on the bottom of the sidebar to go back to your
+regular Filament panel. If you have multiple Filament panels there will be a dropdown so you can choose which 
+panel you want to go back to. When you have only one panel it will directly go back to that panel.
 
-- Run unit tests / pest: `composer test`
-- Run phpunit: `./vendor/bin/phpunit`
+If you have multiple panels you can choose in each panel which name you want to give them in 
+the dropdown, if you dont do that it will show the panel id as name.
 
-Code stijl en linting
+By adding this to your desired Filament panel provider:
+```php
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        ->id('admin')
+        ->path('admin')
+        // ...
+        ->brandName('Admin Panel') // Name in the dropdown
+         }
+}
+```
+## Testing
 
-Volg de repository-conventies; gebruik PHP CS Fixer / Rector indien geconfigureerd in het project.
+```bash
+composer test
+```
 
-Contributie
+## Changelog
 
-1. Fork de repo
-2. Maak een feature-branch
-3. Maak je wijzigingen en tests
-4. Open een pull request
+Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
 
-License
+## Contributing
 
-Dit project valt onder de MIT-licentie. Zie `LICENSE.md` voor details.
+Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
-Contact
+## Security Vulnerabilities
 
-Voor vragen of issues, open een GitHub issue in de originele repository of neem contact op via de repository-eigenaar.
+Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
 
----
+## Credits
 
-Als je wilt, kan ik ook specifiek een korte sectie toevoegen met:
-- Markdown-voorbeeld voor `env`-bestand
-- Snelle debugging-checklist voor sticky/breadcrumb-problemen (met concrete CSS/JS fixes)
-- Voorstellen voor unit tests rond de View-logic (bijv. breadcrumbs alleen tonen wanneer een pagina is geselecteerd)
+- Spatie - Our package skeleton is a modified version
+  of [Spatie's Package Tools](https://github.com/spatie/laravel-package-tools)
 
-Laat weten welke van die extra's je wil, dan voeg ik ze direct toe.
+## License
 
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.

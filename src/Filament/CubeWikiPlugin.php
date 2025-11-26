@@ -13,7 +13,6 @@ class CubeWikiPlugin implements Plugin
 {
     public static string $cubeWikiPanelPath = 'cubewiki';
 
-
     public static array $importantPages = [];
 
     public function getId(): string

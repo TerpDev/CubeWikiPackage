@@ -8,7 +8,6 @@ use Saloon\CachePlugin\Contracts\Driver;
 use Saloon\CachePlugin\Drivers\LaravelCacheDriver;
 use Saloon\CachePlugin\Traits\HasCaching;
 use Saloon\Enums\Method;
-use Saloon\Http\PendingRequest;
 use Saloon\Http\Request;
 
 class KnowledgeBaseRequest extends Request implements Cacheable
@@ -31,10 +30,11 @@ class KnowledgeBaseRequest extends Request implements Cacheable
         return "/api/data/{$this->token}";
     }
 
-//    public function getToken(): string
-//    {
-//        return $this->token;
-//    }
+    public function getToken(): string
+    {
+        return $this->token;
+    }
+
     public function resolveCacheDriver(): Driver
     {
         return new LaravelCacheDriver(Cache::store());
@@ -42,7 +42,7 @@ class KnowledgeBaseRequest extends Request implements Cacheable
 
     public function cacheExpiryInSeconds(): int
     {
-        $value   = config('cubewikipackage.cache_duration', 5);
+        $value = config('cubewikipackage.cache_duration', 5);
         $minutes = is_numeric($value) ? (int) $value : 5;
 
         if ($minutes < 1) {
@@ -51,16 +51,10 @@ class KnowledgeBaseRequest extends Request implements Cacheable
 
         return $minutes * 60;
     }
-    protected function cacheKey(PendingRequest $pendingRequest): ?string
-    {
-        return $this->applicationId
-            ? "wikicube_data_{$this->token}_app_{$this->applicationId}"
-            : "wikicube_data_{$this->token}";
-    }
 
     protected function configCachingEnabled(): bool
     {
-        $value  = config('cubewikipackage.cache_enabled', true);
+        $value = config('cubewikipackage.cache_enabled', true);
         $parsed = filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE);
 
         return $parsed ?? (bool) $value;
