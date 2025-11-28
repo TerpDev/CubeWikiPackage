@@ -19,7 +19,7 @@ class BackToPanelButton extends Component
     {
         $panels = [];
 
-        $preferred = session('cubewiki_return_panel');
+        session('cubewiki_return_panel');
 
         foreach (Filament::getPanels() as $panel) {
             if ($panel->getId() === CubeWikiPackageServiceProvider::$cubeWikiPanelPath) {

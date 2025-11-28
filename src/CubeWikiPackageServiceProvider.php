@@ -16,6 +16,7 @@ use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use TerpDev\CubeWikiPackage\Actions\Panel\Components\HelpAction as PanelHelpAction;
+use TerpDev\CubeWikiPackage\Commands\ClearCacheCommand;
 use TerpDev\CubeWikiPackage\Commands\CubeWikiPackageCommand;
 use TerpDev\CubeWikiPackage\Filament\CubeWikiPanelProvider;
 use TerpDev\CubeWikiPackage\Filament\Pages\Sidebar;

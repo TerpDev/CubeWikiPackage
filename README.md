@@ -19,7 +19,7 @@ composer require terpdev/cubewikipackage
 In your .env file add your WikiCube API details:
 
 ```env
-WIKICUBE_API_URL=https://wikicube.test // Your WikiCube URL
+WIKICUBE_API_URL=https://wikicube.test // The WikiCube API URL
 WIKICUBE_API_TOKEN=YOUR-API-TOKEN
 WIKICUBE_APPLICATION_NAME=YOUR-APPLICATION-NAME
 WIKICUBE_CACHE_ENABLED=true // Set to false to disable API response caching
@@ -49,6 +49,7 @@ pages it will open a slideover with the content of that page from your WikiCube 
 The pages get a slug in the API of WikiCube, add the right slug here to show it in the dropdown.
 In the dropdown you will see the title of the page as it is in WikiCube.
 
+#### Example:
 Add this to your regular Filament panel provider:
 ```php
 use TerpDev\CubeWikiPackage\Filament\CubeWikiPlugin;
@@ -74,6 +75,7 @@ to show a hint for a slug field. This will add a help icon beside the field labe
 on the label it will open a modal or slideover with the content of that hint page from your 
 WikiCube knowledge base.
 
+#### Example:
 Add this to your Filament form component:
 ```php
 use TerpDev\CubeWikiPackage\Actions\Forms\Components\HelpAction as CubeWikiHelp;
@@ -99,15 +101,16 @@ which links to the knowledge base panel.
 
 ## Knowledge Base Panel
 When you have clicked on the documentation button there will open a panel with the knowledge base pages
-fetched from your API_TOKEN you filled in your .env file.
+fetched from your API token and application name you filled in your .env file.
 
 You will see a Terug naar panel button on the bottom of the sidebar to go back to your
 regular Filament panel. If you have multiple Filament panels there will be a dropdown so you can choose which 
 panel you want to go back to. When you have only one panel it will directly go back to that panel.
 
 If you have multiple panels you can choose in each panel which name you want to give them in 
-the dropdown, if you dont do that it will show the panel id as name.
+the dropdown with *->brandName* option otherwise it will choose the id of the panel as the name in the dropdown.
 
+#### Example:
 By adding this to your desired Filament panel provider:
 ```php
 public function panel(Panel $panel): Panel
@@ -119,6 +122,12 @@ public function panel(Panel $panel): Panel
         ->brandName('Admin Panel') // Name in the dropdown
          }
 }
+```
+If you changed something in your WikiCube sometimes the cache needs to be cleared to see the changes.
+You can do this by running the following commands in your project root:
+
+```bash
+php artisan cache:clear 
 ```
 ## Testing
 
