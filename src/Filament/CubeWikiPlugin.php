@@ -15,6 +15,8 @@ class CubeWikiPlugin implements Plugin
 
     public static array $importantPages = [];
 
+    public static bool $documentationDisabled = false;
+
     public function getId(): string
     {
         return 'cubewiki-plugin';
@@ -25,6 +27,18 @@ class CubeWikiPlugin implements Plugin
         self::$importantPages = $pages;
 
         return $this;
+    }
+
+    public function disableDocumentation(bool $disabled = true): static
+    {
+        self::$documentationDisabled = $disabled;
+
+        return $this;
+    }
+
+    public static function documentationEnabled(): bool
+    {
+        return ! self::$documentationDisabled;
     }
 
     public static function getImportantPages(): array

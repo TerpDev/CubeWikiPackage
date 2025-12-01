@@ -22,6 +22,7 @@ use TerpDev\CubeWikiPackage\Filament\CubeWikiPanelProvider;
 use TerpDev\CubeWikiPackage\Filament\Pages\Sidebar;
 use TerpDev\CubeWikiPackage\Livewire\BackToPanelButton;
 use TerpDev\CubeWikiPackage\Livewire\DocumentationButton;
+use TerpDev\CubeWikiPackage\Filament\CubeWikiPlugin;
 
 class CubeWikiPackageServiceProvider extends PackageServiceProvider
 {
@@ -90,7 +91,7 @@ class CubeWikiPackageServiceProvider extends PackageServiceProvider
                     return Blade::render('<livewire:cubewikipackage-back-to-panel-button />');
                 }
 
-                if ($currentPanel) {
+                if ($currentPanel && CubeWikiPlugin::documentationEnabled()) {
                     return Blade::render('<livewire:cubewikipackage-documentation-button />');
                 }
 

@@ -9,6 +9,11 @@ Welcome this is a package which integrates the WikiCube knowledge base into your
 ![Third image](Docs/images/hintaction.png)
 ![Fourth image](Docs/images/hintactionopen.png)
 ![Fifth image](Docs/images/knowledgebase.png)
+### Demo
+<video width="550" controls>
+  <source src="Docs/video/examplevid.mp4" type="video/mp4">
+</video>
+
 
 ## Installation
 You can install the package via composer:
@@ -95,9 +100,30 @@ use TerpDev\CubeWikiPackage\Actions\Forms\Components\HelpAction as CubeWikiHelp;
 ```
 ## Accesing the Knowledge Base Panel
 After installing the package it will automatically add an documentation button on the bottom of the sidebar
-which links to the knowledge base panel.
+which links to the knowledge base panel. 
+
 
 ![Documentation Button](Docs/images/doc-button.png)
+If you want to disable this button to only use the helpaction and hintaction features you can do this:
+#### Example:
+By adding this to your Filament panel provider:
+```php
+use TerpDev\CubeWikiPackage\Filament\CubeWikiPlugin;
+
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        ->id('admin')
+        ->path('admin')
+        // ...
+        ->plugins([
+            CubeWikiPlugin::make()
+                ->disableDocumentation(),
+            ])
+       }
+}
+```
+Then the documentation button will not be shown in the sidebar.
 
 ## Knowledge Base Panel
 When you have clicked on the documentation button there will open a panel with the knowledge base pages
