@@ -10,8 +10,9 @@ Welcome this is a package which integrates the WikiCube knowledge base into your
 ![Fourth image](Docs/images/hintactionopen.png)
 ![Fifth image](Docs/images/knowledgebase.png)
 ### Demo
-[▶️ Watch Demo](Docs/video/examplevid.mp4)
-
+<video width="" height="240" controls>
+  <source src="Docs/video/examplevideo.mp4" type="video/mp4">
+</video>
 
 
 ## Installation
