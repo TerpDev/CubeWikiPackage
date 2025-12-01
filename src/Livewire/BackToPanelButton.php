@@ -39,7 +39,7 @@ class BackToPanelButton extends Component
     {
         return view('cubewikipackage::livewire.back-to-panel-button', [
             'panels' => $this->panels,
-            'singlePanel' => $this->panels[0] ?? null,
+            'singlePanel' => $this->panels[0],
             'hasMultiplePanels' => count($this->panels) > 1,
         ]);
     }
