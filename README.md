@@ -13,10 +13,6 @@ Welcome this is a package which integrates the WikiCube knowledge base into your
 
 
 
-https://github.com/user-attachments/assets/69b9b0e9-d510-495f-8145-00cc0e1cdf09
-
-
-
 ## Installation
 You can install the package via composer:
 
