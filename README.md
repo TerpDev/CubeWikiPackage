@@ -12,6 +12,10 @@ Welcome this is a package which integrates the WikiCube knowledge base into your
 ### Demo
 
 
+https://github.com/user-attachments/assets/bac84325-95a6-43e9-9b4a-845edef8dacc
+
+
+
 
 ## Installation
 You can install the package via composer:
