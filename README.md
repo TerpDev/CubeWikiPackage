@@ -10,8 +10,8 @@ Welcome this is a package which integrates the WikiCube knowledge base into your
 ![Fourth image](Docs/images/hintactionopen.png)
 ![Fifth image](Docs/images/knowledgebase.png)
 ### Demo
-<video width="" height="240" controls>
-  <source src="Docs/video/examplevideo.mp4" type="video/mp4">
+<video width="530" controls>
+  <source src="https://github.com/TerpDev/CubeWikiPackage/blob/main/Docs/video/examplevideo.mp4" type="video/mp4">
 </video>
 
 
