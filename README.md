@@ -5,7 +5,7 @@ Welcome this is a package which integrates the WikiCube knowledge base into your
 
 ## Showcase
 ![first image](Docs/images/helpaction.png)
-![Second image](Docs/images/helpactionopen.png)
+![Second image](../../filament-wiki/Docs/images/openhelpaction.png)
 ![Third image](Docs/images/hintaction.png)
 ![Fourth image](Docs/images/hintactionopen.png)
 ![Fifth image](Docs/images/knowledgebase.png)

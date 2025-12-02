@@ -165,9 +165,80 @@ class HelpAction extends Component implements HasActions, HasForms
         }
 
         $this->title = $found['title'];
-        $this->contentHtml = $found['content_html'];
+        $this->contentHtml = $this->processHeadings($found['content_html'] ?? '');
 
         $this->mountAction('help');
+    }
+
+    protected function processHeadings(string $html): string
+    {
+        $dom = new \DOMDocument;
+        @$dom->loadHTML('<?xml encoding="utf-8"?>'.$html);
+
+        $xpath = new \DOMXPath($dom);
+        $nodes = $xpath->query('//h1 | //h2 | //h3 | //h4 | //h5 | //h6');
+
+        foreach ($nodes as $node) {
+            $text = trim($node->textContent);
+
+            if ($text === '') {
+                continue;
+            }
+
+            $level = (int) substr($node->nodeName, 1);
+
+            // Work with DOMElement only for attribute operations
+            if ($node instanceof \DOMElement) {
+                $id = $node->getAttribute('id') ?: \Illuminate\Support\Str::slug($text);
+
+                if (! $node->hasAttribute('id')) {
+                    $node->setAttribute('id', $id);
+                }
+
+                $existingClass = $node->getAttribute('class');
+                $newClass = trim($existingClass.' scroll-mt-24');
+                $node->setAttribute('class', $newClass);
+
+                $this->prependMarkdownPrefix($node, $level);
+            }
+        }
+
+        $body = $dom->getElementsByTagName('body')->item(0);
+
+        if ($body) {
+            $innerHtml = '';
+            foreach ($body->childNodes as $child) {
+                $innerHtml .= $dom->saveHTML($child);
+            }
+
+            return $innerHtml;
+        }
+
+        return $html;
+    }
+
+    protected function prependMarkdownPrefix(\DOMElement $node, int $level): void
+    {
+        if ($node->hasAttribute('data-markdown-prefixed') || ! $node->ownerDocument) {
+            return;
+        }
+
+        $doc = $node->ownerDocument;
+        $prefixText = '# ';
+
+        $prefixSpan = $doc->createElement('span');
+        $prefixSpan->setAttribute('data-markdown-prefix', 'true');
+        $prefixSpan->setAttribute('style', 'color: var(--primary-600, var(--primary-color, currentColor));');
+        $prefixSpan->setAttribute('aria-hidden', 'true');
+        $prefixSpan->textContent = $prefixText;
+
+        if ($node->firstChild) {
+            $node->insertBefore($prefixSpan, $node->firstChild);
+        } else {
+            $node->appendChild($prefixSpan);
+        }
+
+        $node->setAttribute('data-markdown-prefixed', 'true');
     }
 
     protected function resolveTitleFromData(?array $data, string $slug): ?string
