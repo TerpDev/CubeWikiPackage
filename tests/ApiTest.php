@@ -18,3 +18,6 @@ it('fetches API data from the knowledge base endpoint', function () {
     expect($response->successful())->toBeTrue();
     expect($response->json())->toEqual($payload);
 });
+test('', function () {
+    
+});

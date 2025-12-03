@@ -49,7 +49,7 @@ class CubeWikiPlugin implements Plugin
     public function register(Panel $panel): void
     {
         FilamentView::registerRenderHook(
-            PanelsRenderHook::GLOBAL_SEARCH_AFTER,
+            $panel->hasTopbar() ? PanelsRenderHook::GLOBAL_SEARCH_AFTER : PanelsRenderHook::SIDEBAR_LOGO_AFTER,
             function (): string {
                 $currentPanel = Filament::getCurrentPanel();
                 if ($currentPanel?->getId() === self::$cubeWikiPanelPath) {
@@ -57,6 +57,18 @@ class CubeWikiPlugin implements Plugin
                 }
 
                 return Blade::render('<livewire:cubewikipackage-helpaction />');
+            }
+        );
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::BODY_END,
+            function (): string {
+                $currentPanel = Filament::getCurrentPanel();
+                if ($currentPanel?->getId() === self::$cubeWikiPanelPath) {
+                    return '';
+                }
+
+                return Blade::render('<livewire:cubewikipackage-helpaction host-only="true" />');
             }
         );
     }

@@ -18,6 +18,9 @@ class HelpAction extends Component implements HasActions, HasForms
 {
     use InteractsWithActions;
     use InteractsWithForms;
+
+    public bool $hostOnly = false;
+
     protected $listeners = [
         'cubewiki-open-help' => 'openBySlug',
     ];
@@ -33,6 +36,20 @@ class HelpAction extends Component implements HasActions, HasForms
     protected ?array $currentCategory = null;
 
     protected ?array $currentPage = null;
+
+    public function mount(bool $hostOnly = false): void
+    {
+        $this->hostOnly = $hostOnly;
+    }
+
+    protected function getListeners(): array
+    {
+        if (! $this->hostOnly) {
+            return [];
+        }
+
+        return $this->listeners;
+    }
 
     protected function getPages(): array
     {
@@ -70,6 +87,10 @@ class HelpAction extends Component implements HasActions, HasForms
 
     public function getActions(): array
     {
+        if (! $this->hostOnly) {
+            return [];
+        }
+
         return [
             $this->helpAction(),
         ];

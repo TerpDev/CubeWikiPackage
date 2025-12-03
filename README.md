@@ -44,8 +44,8 @@ This package comes with one plugin with multiple features, they are both for you
 The CubeWikiAction plugin has two features you can use to enhance your regular Filament panels
 
 ### HelpAction
-The helpaction allows you to add an help button to the navbar beside your user menu, you can add
-important pages to this button which open an dropdown and if you click on one of the 
+The helpaction allows you to add a help button to the navbar beside your user menu, you can add
+important pages to this button which open a dropdown and if you click on one of the 
 pages it will open a slideover with the content of that page from your WikiCube knowledge base.
 
 The pages get a slug in the API of WikiCube, add the right slug here to show it in the dropdown.
