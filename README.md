@@ -1,21 +1,16 @@
 # WikiCube Knowledge Base for Filament
 
-Welcome this is a package which integrates the WikiCube knowledge base into your Filament panels.
+Welcome this is a package which integrates the WikiCube knowledge base into your Filament.
 
 
 ## Showcase
 ![first image](Docs/images/helpaction.png)
-![Second image](../../filament-wiki/Docs/images/openhelpaction.png)
-![Third image](Docs/images/hintaction.png)
-![Fourth image](Docs/images/hintactionopen.png)
+![Second image](Docs/images/openhelpaction.png)
+![Third image](Docs/images/hintandinlineaction.png)
+![Fourth image](Docs/images/actionhintopen.png)
 ![Fifth image](Docs/images/knowledgebase.png)
 ### Demo
-
-
 https://github.com/user-attachments/assets/bac84325-95a6-43e9-9b4a-845edef8dacc
-
-
-
 
 ## Installation
 You can install the package via composer:
@@ -100,6 +95,27 @@ use TerpDev\CubeWikiPackage\Actions\Forms\Components\HelpAction as CubeWikiHelp;
         ->slideOver()
 )
 ```
+
+### Inline action
+If you have a description field in your form component and it is really long you can also 
+add a inline action to show the content of that field in a slideover. instead if 
+of showing the full description in the form.
+#### Example:
+Add this to your Filament form component:
+```php
+use TerpDev\CubeWikiPackage\Actions\Forms\Components\HelpAction as CubeWikiHelp;
+
+->description(
+        CubeWikiHelp::parse(
+            'You can now create a [[YOUR-SLUG|TEXT]]
+             from anywhere in your panel to open a slideover
+             with your documentation.'
+        )
+),
+```
+The YOUR-SLUG is the slug of the page in your WikiCube knowledge base and TEXT is the text
+which will be shown in your description.
+
 ## Accesing the Knowledge Base Panel
 After installing the package it will automatically add an documentation button on the bottom of the sidebar
 which links to the knowledge base panel. 

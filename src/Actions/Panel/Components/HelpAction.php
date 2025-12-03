@@ -18,6 +18,9 @@ class HelpAction extends Component implements HasActions, HasForms
 {
     use InteractsWithActions;
     use InteractsWithForms;
+    protected $listeners = [
+        'cubewiki-open-help' => 'openBySlug',
+    ];
 
     public ?string $title = null;
 

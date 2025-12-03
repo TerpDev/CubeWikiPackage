@@ -23,12 +23,38 @@ class HelpAction extends Action
                 .'</div>'
             ));
     }
+    public static function inline(string $slug, string $label): HtmlString
+    {
+        return new HtmlString(
+            view('cubewikipackage::livewire.inline', [
+                'slug'    => $slug,
+                'label'   => $label,
+                'content' => static::resolveHtmlForSlug($slug),
+            ])->render()
+        );
+    }
+    public static function parse(string $text): HtmlString
+    {
+        return new HtmlString(
+            preg_replace_callback('/\[\[(.*?)\|(.*?)\]\]/', function (array $match) {
+                $slug = $match[1];
+                $label = $match[2];
+
+                return static::inline($slug, $label)->toHtml();
+            }, $text)
+        );
+    }
+
     protected static function resolveHtmlForSlug(string $slug): string
     {
         $token = static::resolveApiToken();
         $service = app(WikiCubeApiService::class);
         $data = $service->fetchKnowledgeBase($token, null);
         $page = static::findPageBySlug($data, $slug);
+
+        if (! $page) {
+            return '<p>The slug: '.e($slug).' is not in the API! Choose a different one</p>';
+        }
 
         return $page['content_html'];
     }
@@ -64,4 +90,5 @@ class HelpAction extends Action
 
         return $token ?: null;
     }
+
 }
