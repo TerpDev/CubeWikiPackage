@@ -11,6 +11,12 @@ Welcome this is a package which integrates the WikiCube knowledge base into your
 ![Fifth image](Docs/images/knowledgebase.png)
 ### Demo
 [example.mp4](Docs/video/example.mp4)
+
+
+https://github.com/user-attachments/assets/a5077dd8-a0cc-4f0a-833b-5f7b6b94ac4d
+
+
+
 ## Installation
 You can install the package via composer:
 
