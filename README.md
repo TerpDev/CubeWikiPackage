@@ -10,7 +10,11 @@ Welcome this is a package which integrates the WikiCube knowledge base into your
 ![Fourth image](Docs/images/actionhintopen.png)
 ![Fifth image](Docs/images/knowledgebase.png)
 ### Demo
-[example.mp4](Docs/video/example.mp4)
+
+https://github.com/user-attachments/assets/a5077dd8-a0cc-4f0a-833b-5f7b6b94ac4d
+
+
+
 ## Installation
 You can install the package via composer:
 
@@ -33,7 +37,7 @@ WIKICUBE_CACHE_DURATION=5   // Cache duration in minutes
 - Filament v4+
 
 ## Introduction
-This package allows you to see the CubeWiki knowledge base pages directly inside a Filament panel. 
+This package allows you to see the CubeWiki knowledge base pages directly inside a Filament panel.
 Which is added when you install the package with an documentation button on the bottom of the sidebar.
 
 This package comes with one plugin with multiple features, they are both for your regular Filament panels.
@@ -44,7 +48,7 @@ The CubeWikiAction plugin has two features you can use to enhance your regular F
 
 ### HelpAction
 The helpaction allows you to add a help button to the navbar beside your user menu, you can add
-important pages to this button which open a dropdown and if you click on one of the 
+important pages to this button which open a dropdown and if you click on one of the
 pages it will open a slideover with the content of that page from your WikiCube knowledge base.
 
 The pages get a slug in the API of WikiCube, add the right slug here to show it in the dropdown.
@@ -71,9 +75,9 @@ public function panel(Panel $panel): Panel
 }
 ```
 ### Hint Action
-The hintaction allows you to add hints to your Filament form components. for example if you want 
+The hintaction allows you to add hints to your Filament form components. for example if you want
 to show a hint for a slug field. This will add a help icon beside the field label, when you click
-on the label it will open a modal or slideover with the content of that hint page from your 
+on the label it will open a modal or slideover with the content of that hint page from your
 WikiCube knowledge base.
 
 #### Example:
@@ -96,8 +100,8 @@ use TerpDev\CubeWikiPackage\Actions\Forms\Components\HelpAction as CubeWikiHelp;
 ```
 
 ### Inline action
-If you have a description field in your form component and it is really long you can also 
-add a inline action to show the content of that field in a slideover. instead if 
+If you have a description field in your form component and it is really long you can also
+add a inline action to show the content of that field in a slideover. instead if
 of showing the full description in the form.
 #### Example:
 Add this to your Filament form component:
@@ -117,7 +121,7 @@ which will be shown in your description.
 
 ## Accesing the Knowledge Base Panel
 After installing the package it will automatically add an documentation button on the bottom of the sidebar
-which links to the knowledge base panel. 
+which links to the knowledge base panel.
 
 
 ![Documentation Button](Docs/images/doc-button.png)
@@ -147,10 +151,10 @@ When you have clicked on the documentation button there will open a panel with t
 fetched from your API token and application name you filled in your .env file.
 
 You will see a Terug naar panel button on the bottom of the sidebar to go back to your
-regular Filament panel. If you have multiple Filament panels there will be a dropdown so you can choose which 
+regular Filament panel. If you have multiple Filament panels there will be a dropdown so you can choose which
 panel you want to go back to. When you have only one panel it will directly go back to that panel.
 
-If you have multiple panels you can choose in each panel which name you want to give them in 
+If you have multiple panels you can choose in each panel which name you want to give them in
 the dropdown with *->brandName* option otherwise it will choose the id of the panel as the name in the dropdown.
 
 #### Example:
