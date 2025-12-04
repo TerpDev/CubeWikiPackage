@@ -10,8 +10,7 @@ Welcome this is a package which integrates the WikiCube knowledge base into your
 ![Fourth image](Docs/images/actionhintopen.png)
 ![Fifth image](Docs/images/knowledgebase.png)
 ### Demo
-https://github.com/user-attachments/assets/bac84325-95a6-43e9-9b4a-845edef8dacc
-
+[example.mp4](Docs/video/example.mp4)
 ## Installation
 You can install the package via composer:
 
